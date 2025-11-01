@@ -2,6 +2,6 @@ package com.luis.artelyapp.viewmodel
 
 import androidx.lifecycle.ViewModel
 
-class ArtistViewModel : ViewModel(){
+class CustomerViewModel : ViewModel(){
 
 }
