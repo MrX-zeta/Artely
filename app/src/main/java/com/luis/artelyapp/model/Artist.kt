@@ -5,7 +5,7 @@ data class Artist(
     override val id_User:Int,
     override val Email:String,
     override val Psswd:String,
-    override val Role:String,
+    override val Role: String,
 
     // Propiedades propias de Artist
     val Bio: String,
