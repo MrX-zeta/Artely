@@ -105,5 +105,5 @@ fun PhoneContainer(content: @Composable () -> Unit) {
 
 @Composable
 fun HelloWorld(){
-    Text("Hello world")
+    Text("El pepe")
 }
