@@ -1,5 +1,6 @@
 package com.luis.artelyapp.ui.navigation
 
+import android.net.Uri
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -10,12 +11,16 @@ import androidx.navigation.navArgument
 import com.luis.artelyapp.ui.main.GalleryScreen
 import com.luis.artelyapp.ui.view.ChatView
 import com.luis.artelyapp.ui.view.MessageView
+import com.luis.artelyapp.ui.ArtistProfile.ArtistProfileScreen
 
 sealed class Screen(val route: String) {
     object Gallery : Screen("gallery")
     object Chat : Screen("chat")
     object Message : Screen("message/{chatId}") {
         fun createRoute(chatId: Int) = "message/$chatId"
+    }
+    object Profile : Screen("profile/{artistName}") {
+        fun createRoute(artistName: String) = "profile/${Uri.encode(artistName)}"
     }
 }
 
@@ -31,6 +36,9 @@ fun NavManager() {
             GalleryScreen(
                 onNavigateToChat = {
                     navController.navigate(Screen.Chat.route)
+                },
+                onArtistClick = { artistName ->
+                    navController.navigate(Screen.Profile.createRoute(artistName))
                 }
             )
         }
@@ -51,6 +59,19 @@ fun NavManager() {
         ) { backStackEntry ->
             val chatId = backStackEntry.arguments?.getInt("chatId") ?: 0
             MessageView(chatId = chatId)
+        }
+
+        composable(
+            route = Screen.Profile.route,
+            arguments = listOf(
+                navArgument("artistName") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val artistName = backStackEntry.arguments?.getString("artistName") ?: ""
+            ArtistProfileScreen(
+                artistName = artistName,
+                onBackClick = { navController.popBackStack() }
+            )
         }
     }
 }
