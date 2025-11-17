@@ -3,6 +3,7 @@ package com.luis.artelyapp
 import android.app.Activity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
@@ -21,10 +22,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.luis.artelyapp.ui.auth.LoginScreen
 import com.luis.artelyapp.ui.auth.RegisterScreen
-import com.luis.artelyapp.ui.navigation.NavManager
 import com.luis.artelyapp.ui.onboarding.WelcomeScreen
 import com.luis.artelyapp.ui.theme.ArtelyAppTheme
 import androidx.compose.ui.platform.LocalContext
+import com.luis.artelyapp.ui.navigation.NavManager
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,7 +34,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             ArtelyAppTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    PhoneContainer { RootContent() }
+                    RootContent()
                 }
             }
         }
@@ -63,35 +64,44 @@ private fun RootContent() {
         else activity?.finish()
     }
 
+    BackHandler(enabled = true) { goBack() }
+
     when (current) {
-        is Screen.Welcome -> WelcomeScreen(
+        is Screen.Welcome -> PhoneContainer { WelcomeScreen(
             onExplore = { navigateTo(Screen.Gallery) },
             onGetStarted = { navigateTo(Screen.Register) }
-        )
-        is Screen.Register -> RegisterScreen(
+        ) }
+
+        is Screen.Register -> PhoneContainer { RegisterScreen(
             onRegistered = { navigateTo(Screen.Gallery) },
             onBack = { goBack() },
             onLogin = { navigateTo(Screen.Login) }
-        )
-        is Screen.Login -> LoginScreen(
+        ) }
+
+        is Screen.Login -> PhoneContainer { LoginScreen(
             onLogin = { navigateTo(Screen.Gallery) },
             onBack = { goBack() },
             onRegister = { navigateTo(Screen.Register) }
-        )
-        is Screen.Gallery -> NavManager() // Usa el NavManager aquí
+        ) }
+
+        is Screen.Gallery -> PhoneContainer(clip = false) { NavManager() }
     }
 }
 
 @Composable
-fun PhoneContainer(content: @Composable () -> Unit) {
+fun PhoneContainer(clip: Boolean = true, content: @Composable () -> Unit) {
     val backgroundBrush = Brush.linearGradient(
         colors = listOf(Color(0xFF1A1A1A), Color(0xFF2D2D2D))
     )
 
+    val baseModifier = if (clip) {
+        Modifier.clip(RoundedCornerShape(24.dp)).background(backgroundBrush)
+    } else {
+        Modifier.background(backgroundBrush)
+    }
+
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(backgroundBrush)
+        modifier = baseModifier
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             content()
