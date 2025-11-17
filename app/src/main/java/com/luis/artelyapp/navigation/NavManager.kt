@@ -2,7 +2,6 @@ package com.luis.artelyapp.ui.navigation
 
 import android.net.Uri
 import androidx.compose.runtime.Composable
-import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -12,6 +11,7 @@ import com.luis.artelyapp.ui.main.GalleryScreen
 import com.luis.artelyapp.ui.view.ChatView
 import com.luis.artelyapp.ui.view.MessageView
 import com.luis.artelyapp.ui.ArtistProfile.ArtistProfileScreen
+import com.luis.artelyapp.ui.UserProfile.UserProfileScreen
 
 sealed class Screen(val route: String) {
     object Gallery : Screen("gallery")
@@ -22,6 +22,7 @@ sealed class Screen(val route: String) {
     object Profile : Screen("profile/{artistName}") {
         fun createRoute(artistName: String) = "profile/${Uri.encode(artistName)}"
     }
+    object UserProfile : Screen("userprofile")
 }
 
 @Composable
@@ -39,6 +40,9 @@ fun NavManager() {
                 },
                 onArtistClick = { artistName ->
                     navController.navigate(Screen.Profile.createRoute(artistName))
+                },
+                onNavigateToProfile = {
+                    navController.navigate(Screen.UserProfile.route)
                 }
             )
         }
@@ -72,6 +76,10 @@ fun NavManager() {
                 artistName = artistName,
                 onBackClick = { navController.popBackStack() }
             )
+        }
+
+        composable(Screen.UserProfile.route) {
+            UserProfileScreen(onBackClick = { navController.popBackStack() })
         }
     }
 }
