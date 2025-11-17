@@ -19,6 +19,7 @@ import com.luis.artelyapp.ui.auth.RegisterScreen
 import com.luis.artelyapp.ui.main.GalleryScreen
 import com.luis.artelyapp.ui.onboarding.WelcomeScreen
 import com.luis.artelyapp.ui.UserProfile.UserProfileScreen
+import com.luis.artelyapp.ui.CreatePost.CreatePostScreen
 import com.luis.artelyapp.ui.theme.ArtelyAppTheme
 import androidx.compose.ui.platform.LocalContext
 
@@ -41,6 +42,7 @@ private sealed class Screen {
     object Register : Screen()
     object Login : Screen()
     data class Gallery(val isUserAuthenticated: Boolean = false) : Screen()
+    object CreatePost : Screen()
     object UserProfile : Screen()
 }
 
@@ -84,10 +86,24 @@ private fun RootContent() {
                 } else {
                     navigateTo(Screen.Login)
                 }
+            },
+            onAddPostClick = {
+                if (current.isUserAuthenticated) {
+                    navigateTo(Screen.CreatePost)
+                } else {
+                    navigateTo(Screen.Login)
+                }
             }
         )
         is Screen.UserProfile -> UserProfileScreen(
             onBackClick = { goBack() }
+        )
+        is Screen.CreatePost -> CreatePostScreen(
+            onBackClick = { goBack() },
+            onPublishPost = { title, description ->
+                // Aquí puedes manejar la lógica para guardar el post
+                goBack() // Regresa a la galería después de publicar
+            }
         )
     }
 }

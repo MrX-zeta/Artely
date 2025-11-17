@@ -30,7 +30,8 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun GalleryScreen(
     onArtistClick: (String) -> Unit = {},
-    onProfileClick: () -> Unit = {}
+    onProfileClick: () -> Unit = {},
+    onAddPostClick: () -> Unit = {}
 ) {
     // Datos de ejemplo locales (temporal hasta conectar ViewModel/Repositorio)
     val artworksSample = listOf(
@@ -46,7 +47,10 @@ fun GalleryScreen(
         containerColor = Color.Transparent,
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
-            BottomNavigationBar(onProfileClick = onProfileClick)
+            BottomNavigationBar(
+                onProfileClick = onProfileClick,
+                onAddPostClick = onAddPostClick
+            )
         }
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
@@ -183,7 +187,10 @@ fun ArtworkCard(art: Artwork) {
 }
 
 @Composable
-fun BottomNavigationBar(onProfileClick: () -> Unit = {}) {
+fun BottomNavigationBar(
+    onProfileClick: () -> Unit = {},
+    onAddPostClick: () -> Unit = {}
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -198,10 +205,10 @@ fun BottomNavigationBar(onProfileClick: () -> Unit = {}) {
         items.forEachIndexed { index, pair ->
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = if (pair.first == "Perfil") {
-                    Modifier.clickable { onProfileClick() }
-                } else {
-                    Modifier
+                modifier = when (pair.first) {
+                    "Perfil" -> Modifier.clickable { onProfileClick() }
+                    "Agregar" -> Modifier.clickable { onAddPostClick() }
+                    else -> Modifier
                 }
             ) {
                 Text(text = pair.second, fontSize = 18.sp)

@@ -5,7 +5,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -76,19 +75,21 @@ fun UserProfileScreen(
         followingCount = 38
     )
 
-    val galleryArtworks = listOf(
-        UserArtwork(1, "La Gioconda", "Leonardo da Vinci"),
-        UserArtwork(2, "Retrato Contemporáneo", "Aristote"),
-        UserArtwork(3, "Noche Estrellada", "Vincent van Gogh"),
-        UserArtwork(4, "Las Meninas", "Diego Velázquez"),
-        UserArtwork(5, "La Persistencia de la Memoria", "Salvador Dalí")
-    )
+    val galleryArtworks = listOf<UserArtwork>() // Temporalmente vacío para probar
+    // val galleryArtworks = listOf(
+    //     UserArtwork(1, "La Gioconda", "Leonardo da Vinci"),
+    //     UserArtwork(2, "Retrato Contemporáneo", "Aristote"),
+    //     UserArtwork(3, "Noche Estrellada", "Vincent van Gogh"),
+    //     UserArtwork(4, "Las Meninas", "Diego Velázquez"),
+    //     UserArtwork(5, "La Persistencia de la Memoria", "Salvador Dalí")
+    // )
 
-    val forSaleArtworks = listOf(
-        UserArtwork(6, "Reflejos", "Aristote", "$2,100", true),
-        UserArtwork(7, "Autorretrato Moderno", "Pablo Picasso", "$3,500", true),
-        UserArtwork(8, "Composición en Azul", "Wassily Kandinsky", "$1,800", true)
-    )
+    val forSaleArtworks = listOf<UserArtwork>() // Temporalmente vacío para probar
+    // val forSaleArtworks = listOf(
+    //     UserArtwork(6, "Reflejos", "Aristote", "$2,100", true),
+    //     UserArtwork(7, "Autorretrato Moderno", "Pablo Picasso", "$3,500", true),
+    //     UserArtwork(8, "Composición en Azul", "Wassily Kandinsky", "$1,800", true)
+    // )
 
     Box(
         modifier = Modifier
@@ -470,37 +471,120 @@ private fun CollectionsSection(
             .padding(16.dp)
     ) {
         Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .width(3.dp)
+                        .height(16.dp)
+                        .background(AccentGold, RoundedCornerShape(2.dp))
+                )
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Text(
+                    text = "COLECCIONES",
+                    color = AccentGold,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp
+                )
+            }
+
+            // Add Post Button (sin funcionalidad pero con colores originales)
+            Button(
+                onClick = { /* No hace nada */ },
                 modifier = Modifier
-                    .width(3.dp)
-                    .height(16.dp)
-                    .background(AccentGold, RoundedCornerShape(2.dp))
-            )
-
-            Spacer(modifier = Modifier.width(8.dp))
-
-            Text(
-                text = "COLECCIONES",
-                color = AccentGold,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = 1.sp
-            )
+                    .size(40.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = AccentGold, // Color original
+                    contentColor = Color.Black   // Color original
+                ),
+                shape = CircleShape,
+                contentPadding = PaddingValues(0.dp),
+                elevation = ButtonDefaults.buttonElevation(
+                    defaultElevation = 4.dp,
+                    pressedElevation = 2.dp
+                )
+            ) {
+                Text(
+                    text = "➕",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
-
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // LazyRow horizontal para mostrar las obras de arte
-        LazyRow(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            contentPadding = PaddingValues(horizontal = 4.dp)
-        ) {
-            items(artworks.size) { index ->
-                UserArtworkCard(artworks[index])
+        // Mostrar mensaje si no hay artworks o mostrar grid vertical
+        if (artworks.isEmpty()) {
+            // Mensaje cuando no hay colecciones
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = "🎨",
+                        fontSize = 48.sp,
+                        color = TextSecondary
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Text(
+                        text = "Aún no tienes colecciones",
+                        color = TextSecondary,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Medium,
+                        textAlign = TextAlign.Center
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(
+                        text = "Comparte tu primera obra de arte",
+                        color = TextSecondary.copy(alpha = 0.7f),
+                        fontSize = 14.sp,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+        } else {
+            // Grid vertical de obras de arte
+            val chunkedArtworks = artworks.chunked(2)
+
+            chunkedArtworks.forEach { rowArtworks ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    rowArtworks.forEach { artwork ->
+                        Box(
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            UserArtworkCard(artwork)
+                        }
+                    }
+
+                    // Si solo hay un elemento en la fila, agregar espaciador
+                    if (rowArtworks.size == 1) {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
             }
         }
 
@@ -512,8 +596,8 @@ private fun CollectionsSection(
 private fun UserArtworkCard(artwork: UserArtwork) {
     Card(
         modifier = Modifier
-            .width(280.dp)
-            .height(200.dp), // Aumentar altura para acomodar más texto
+            .fillMaxWidth()
+            .height(200.dp), // Mantener altura para acomodar más texto
         colors = CardDefaults.cardColors(
             containerColor = CardBackground
         ),
