@@ -23,7 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.luis.artelyapp.ui.auth.LoginScreen
 import com.luis.artelyapp.ui.auth.RegisterScreen
-import com.luis.artelyapp.ui.main.GalleryScreen
+import com.luis.artelyapp.ui.navigation.NavManager
 import com.luis.artelyapp.ui.onboarding.WelcomeScreen
 import com.luis.artelyapp.ui.theme.ArtelyAppTheme
 import androidx.compose.ui.platform.LocalContext
@@ -82,7 +82,7 @@ private fun RootContent() {
             onBack = { goBack() },
             onRegister = { navigateTo(Screen.Register) }
         )
-        is Screen.Gallery -> GalleryScreen()
+        is Screen.Gallery -> PhoneContainer { NavManager() }
     }
 }
 
