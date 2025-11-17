@@ -2,10 +2,25 @@
 <project version="4">
   <component name="AgentMigrationStateService">
     <option name="pendingSessionIds">
+      <option value="8ce77b5f-3668-43e8-8715-dcb850202924" />
       <option value="a89db335-0040-43e7-8c94-f401144c8ae3" />
     </option>
     <option name="pendingTurns">
       <map>
+        <entry key="8ce77b5f-3668-43e8-8715-dcb850202924">
+          <value>
+            <set>
+              <option value="0c3e1607-06b3-4ec4-a67d-acbd7d805e3e" />
+              <option value="253849bc-5412-46f2-8801-b846c14144f2" />
+              <option value="33364389-ab79-4e9e-96db-93d75a3c261b" />
+              <option value="18afccf0-e5cc-465a-97d1-93b5d899a612" />
+              <option value="71ff74fe-1d90-4aaa-b730-105d76fc496f" />
+              <option value="d726aa5a-c1c7-4e9e-b15a-8e9c3130972b" />
+              <option value="9347e0ce-0984-474c-bdc0-6acd807fc3e0" />
+              <option value="dda18df2-4273-49ff-8fbd-db51e1ae9a01" />
+            </set>
+          </value>
+        </entry>
         <entry key="a89db335-0040-43e7-8c94-f401144c8ae3">
           <value>
             <set>
@@ -15,5 +30,14 @@
         </entry>
       </map>
     </option>
+    <pendingWorkingSetItems>
+      <entry key="8ce77b5f-3668-43e8-8715-dcb850202924">
+        <set>
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/ui/UserProfile/UserProfile.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/MainActivity.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/ui/main/GalleryScreen.kt" />
+        </set>
+      </entry>
+    </pendingWorkingSetItems>
   </component>
 </project>

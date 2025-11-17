@@ -6,25 +6,19 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import com.luis.artelyapp.ui.auth.LoginScreen
 import com.luis.artelyapp.ui.auth.RegisterScreen
 import com.luis.artelyapp.ui.main.GalleryScreen
 import com.luis.artelyapp.ui.onboarding.WelcomeScreen
+import com.luis.artelyapp.ui.UserProfile.UserProfileScreen
 import com.luis.artelyapp.ui.theme.ArtelyAppTheme
 import androidx.compose.ui.platform.LocalContext
 
@@ -46,7 +40,8 @@ private sealed class Screen {
     object Welcome : Screen()
     object Register : Screen()
     object Login : Screen()
-    object Gallery : Screen()
+    data class Gallery(val isUserAuthenticated: Boolean = false) : Screen()
+    object UserProfile : Screen()
 }
 
 @Composable
@@ -69,41 +64,41 @@ private fun RootContent() {
 
     when (current) {
         is Screen.Welcome -> WelcomeScreen(
-            onExplore = { navigateTo(Screen.Gallery) },
+            onExplore = { navigateTo(Screen.Gallery(isUserAuthenticated = false)) },
             onGetStarted = { navigateTo(Screen.Register) }
         )
         is Screen.Register -> RegisterScreen(
-            onRegistered = { navigateTo(Screen.Gallery) },
+            onRegistered = { navigateTo(Screen.Gallery(isUserAuthenticated = true)) },
             onBack = { goBack() },
             onLogin = { navigateTo(Screen.Login) }
         )
         is Screen.Login -> LoginScreen(
-            onLogin = { navigateTo(Screen.Gallery) },
+            onLogin = { navigateTo(Screen.Gallery(isUserAuthenticated = true)) },
             onBack = { goBack() },
             onRegister = { navigateTo(Screen.Register) }
         )
-        is Screen.Gallery -> GalleryScreen()
+        is Screen.Gallery -> GalleryScreen(
+            onProfileClick = {
+                if (current.isUserAuthenticated) {
+                    navigateTo(Screen.UserProfile)
+                } else {
+                    navigateTo(Screen.Login)
+                }
+            }
+        )
+        is Screen.UserProfile -> UserProfileScreen(
+            onBackClick = { goBack() }
+        )
     }
 }
 
 @Composable
 fun PhoneContainer(content: @Composable () -> Unit) {
-    val backgroundBrush = Brush.linearGradient(
-        colors = listOf(Color(0xFF1A1A1A), Color(0xFF2D2D2D))
-    )
-
     Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(24.dp))
-            .background(backgroundBrush)
+        modifier = Modifier.fillMaxSize()
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             content()
         }
     }
-}
-
-@Composable
-fun HelloWorld(){
-    Text("El pepe")
 }

@@ -28,7 +28,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun GalleryScreen() {
+fun GalleryScreen(
+    onArtistClick: (String) -> Unit = {},
+    onProfileClick: () -> Unit = {}
+) {
     // Datos de ejemplo locales (temporal hasta conectar ViewModel/Repositorio)
     val artworksSample = listOf(
         Artwork(1, "Noche Estrellada", "Vincent van Gogh", "Una de las obras más reconocidas de Van Gogh, pintada en 1889."),
@@ -43,7 +46,7 @@ fun GalleryScreen() {
         containerColor = Color.Transparent,
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
-            BottomNavigationBar()
+            BottomNavigationBar(onProfileClick = onProfileClick)
         }
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
@@ -180,7 +183,7 @@ fun ArtworkCard(art: Artwork) {
 }
 
 @Composable
-fun BottomNavigationBar() {
+fun BottomNavigationBar(onProfileClick: () -> Unit = {}) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -193,7 +196,14 @@ fun BottomNavigationBar() {
         // Cambiamos la etiqueta inferior de 'Buscar' a 'Chat' y mantenemos el icono de chat
         val items = listOf("Inicio" to "🏠", "Chat" to "💬", "Agregar" to "➕", "Perfil" to "👤")
         items.forEachIndexed { index, pair ->
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = if (pair.first == "Perfil") {
+                    Modifier.clickable { onProfileClick() }
+                } else {
+                    Modifier
+                }
+            ) {
                 Text(text = pair.second, fontSize = 18.sp)
                 Text(text = pair.first, fontSize = 12.sp, color = if (index == 0) Color(0xFFD4AF37) else Color(0xFF888888))
             }
