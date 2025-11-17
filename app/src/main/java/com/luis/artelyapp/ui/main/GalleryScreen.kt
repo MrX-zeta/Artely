@@ -17,6 +17,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,7 +29,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun GalleryScreen() {
+fun GalleryScreen(
+    onNavigateToChat: () -> Unit = {},
+    onArtistClick: (String) -> Unit = {},
+    onNavigateToProfile: () -> Unit = {}
+) {
     // Datos de ejemplo locales (temporal hasta conectar ViewModel/Repositorio)
     val artworksSample = listOf(
         Artwork(1, "Noche Estrellada", "Vincent van Gogh", "Una de las obras más reconocidas de Van Gogh, pintada en 1889."),
@@ -43,7 +48,12 @@ fun GalleryScreen() {
         containerColor = Color.Transparent,
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
-            BottomNavigationBar()
+            BottomNavigationBar(onTabSelected = { index ->
+                when (index) {
+                    1 -> onNavigateToChat()
+                    3 -> onNavigateToProfile()
+                }
+            })
         }
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
@@ -64,7 +74,7 @@ fun GalleryScreen() {
                         fontWeight = FontWeight.Light,
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
-                    FeaturedArtworkCard(artworksSample.first())
+                    FeaturedArtworkCard(artworksSample.first(), onArtistClick = onArtistClick)
                 }
 
                 item {
@@ -83,7 +93,7 @@ fun GalleryScreen() {
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             for (art in row) {
                                 Box(modifier = Modifier.weight(1f)) {
-                                    ArtworkCard(art)
+                                    ArtworkCard(art, onArtistClick = onArtistClick)
                                 }
                             }
                             if (row.size == 1) {
@@ -122,11 +132,12 @@ fun Header() {
 }
 
 @Composable
-fun FeaturedArtworkCard(artwork: Artwork) {
+fun FeaturedArtworkCard(artwork: Artwork, onArtistClick: (String) -> Unit = {}) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp)),
+            .clip(RoundedCornerShape(12.dp))
+            .clickable { onArtistClick(artwork.artist) },
         shape = RoundedCornerShape(12.dp)
     ) {
         Column(modifier = Modifier.background(
@@ -153,12 +164,12 @@ fun FeaturedArtworkCard(artwork: Artwork) {
 }
 
 @Composable
-fun ArtworkCard(art: Artwork) {
+fun ArtworkCard(art: Artwork, onArtistClick: (String) -> Unit = {}) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(6.dp)
-            .clickable { /* navegar a detalle */ },
+            .clickable { onArtistClick(art.artist) },
         shape = RoundedCornerShape(12.dp)
     ) {
         Column(modifier = Modifier.background(Color(0xFF2A2A2A))) {
@@ -180,7 +191,7 @@ fun ArtworkCard(art: Artwork) {
 }
 
 @Composable
-fun BottomNavigationBar() {
+fun BottomNavigationBar(onTabSelected: (Int) -> Unit = {}) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -193,7 +204,8 @@ fun BottomNavigationBar() {
         // Cambiamos la etiqueta inferior de 'Buscar' a 'Chat' y mantenemos el icono de chat
         val items = listOf("Inicio" to "🏠", "Chat" to "💬", "Agregar" to "➕", "Perfil" to "👤")
         items.forEachIndexed { index, pair ->
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.clickable { onTabSelected(index) }) {
                 Text(text = pair.second, fontSize = 18.sp)
                 Text(text = pair.first, fontSize = 12.sp, color = if (index == 0) Color(0xFFD4AF37) else Color(0xFF888888))
             }
