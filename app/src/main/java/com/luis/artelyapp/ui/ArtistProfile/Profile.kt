@@ -13,7 +13,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -190,80 +189,36 @@ fun ArtistProfileScreen(
         )
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Transparent),
-        contentAlignment = Alignment.Center
-    ) {
-        Box(
-            modifier = Modifier
-                .width(430.dp)
-                .height(886.dp)
-                .shadow(
-                    elevation = 30.dp,
-                    shape = RoundedCornerShape(40.dp),
-                    ambientColor = Color.Black.copy(alpha = 0.5f),
-                    spotColor = Color.Black.copy(alpha = 0.5f)
-                )
-                .clip(RoundedCornerShape(40.dp))
-                .background(
-                    Brush.linearGradient(
-                        colors = listOf(DarkBackground, DarkBackground),
-                        start = androidx.compose.ui.geometry.Offset(0f, 0f),
-                        end = androidx.compose.ui.geometry.Offset(1f, 1f)
-                    )
-                )
-                .border(
-                    width = 12.dp,
-                    color = Color.Black,
-                    shape = RoundedCornerShape(40.dp)
-                )
-        ) {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize()
-            ) {
-                item { TopBar(onBackClick = onBackClick) }
-                item { ArtistHeader(sampleArtist, sampleStats) }
-                item {
-                    TabSection(
-                        selectedTab = selectedTab,
-                        onTabSelected = { tab -> selectedTab = tab }
-                    )
-                }
-                item {
-                    CollectionsSection(
-                        artworks = when(selectedTab) {
-                            ProfileTab.GALLERY -> sampleArtworksGallery
-                            ProfileTab.FOR_SALE -> sampleArtworksForSale
-                        }
-                    )
-                }
-                item { Spacer(modifier = Modifier.height(100.dp)) }
-            }
-
-            BottomNavigationBar(
-                modifier = Modifier.align(Alignment.BottomCenter)
-            )
+    Scaffold(
+        containerColor = DarkBackground,
+        bottomBar = {
+            BottomNavigationBar()
         }
-
-        // Gradient overlay
-        Box(
+    ) { innerPadding ->
+        // Contenido scrollable ocupa todo el espacio disponible (respeta innerPadding)
+        LazyColumn(
             modifier = Modifier
-                .width(430.dp)
-                .height(886.dp)
-                .clip(RoundedCornerShape(40.dp))
-                .background(
-                    Brush.linearGradient(
-                        colors = listOf(
-                            AccentGold.copy(alpha = 0.03f),
-                            Color.Transparent,
-                            AccentGold.copy(alpha = 0.03f),
-                            Color.Transparent
-                        )
-                    )
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
+            item { TopBar(onBackClick = onBackClick) }
+            item { ArtistHeader(sampleArtist, sampleStats) }
+            item {
+                TabSection(
+                    selectedTab = selectedTab,
+                    onTabSelected = { tab -> selectedTab = tab }
                 )
-        )
+            }
+            item {
+                CollectionsSection(
+                    artworks = when(selectedTab) {
+                        ProfileTab.GALLERY -> sampleArtworksGallery
+                        ProfileTab.FOR_SALE -> sampleArtworksForSale
+                    }
+                )
+            }
+            // No spacer needed; Scaffold lo gestiona
+        }
     }
 }
 
