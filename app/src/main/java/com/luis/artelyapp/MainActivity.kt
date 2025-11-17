@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
@@ -113,7 +112,3 @@ fun PhoneContainer(content: @Composable () -> Unit) {
     }
 }
 
-@Composable
-fun HelloWorld(){
-    Text("El pepe")
-}

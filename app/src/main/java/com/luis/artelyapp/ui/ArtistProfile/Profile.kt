@@ -5,7 +5,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -577,14 +576,54 @@ private fun CollectionsSection(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // LazyRow horizontal para mostrar las obras de arte
-        LazyRow(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            contentPadding = PaddingValues(horizontal = 4.dp)
-        ) {
-            items(artworks) { artwork ->
-                ArtPieceCard(artwork)
+        // LazyColumn vertical con scroll para mostrar las obras de arte
+        if (artworks.isEmpty()) {
+            // Mensaje cuando no hay obras
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = "🎨",
+                        fontSize = 48.sp,
+                        color = TextSecondary
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Text(
+                        text = "Aún no hay obras en esta sección",
+                        color = TextSecondary,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Medium,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+        } else {
+            // LazyColumn vertical con scroll para las obras
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(400.dp), // Altura fija para permitir scroll
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                contentPadding = PaddingValues(vertical = 4.dp)
+            ) {
+                items(artworks) { artwork ->
+                    // Centrar cada tarjeta en el ancho disponible
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        ArtPieceCard(artwork)
+                    }
+                }
             }
         }
 
@@ -596,8 +635,8 @@ private fun CollectionsSection(
 private fun ArtPieceCard(artwork: Artwork) {
     Card(
         modifier = Modifier
-            .width(280.dp) // Ancho fijo para que se vean completos
-            .height(200.dp), // Aumentar altura para acomodar más texto
+            .width(280.dp) // Tamaño original restaurado
+            .height(200.dp), // Altura mantenida para acomodar más texto
         colors = CardDefaults.cardColors(
             containerColor = CardBackground
         ),
