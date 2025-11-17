@@ -28,7 +28,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun GalleryScreen() {
+fun GalleryScreen(
+    onArtistClick: (String) -> Unit = {}
+) {
     // Datos de ejemplo locales (temporal hasta conectar ViewModel/Repositorio)
     val artworksSample = listOf(
         Artwork(1, "Noche Estrellada", "Vincent van Gogh", "Una de las obras más reconocidas de Van Gogh, pintada en 1889."),
@@ -64,7 +66,10 @@ fun GalleryScreen() {
                         fontWeight = FontWeight.Light,
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
-                    FeaturedArtworkCard(artworksSample.first())
+                    FeaturedArtworkCard(
+                        artwork = artworksSample.first(),
+                        onArtistClick = onArtistClick
+                    )
                 }
 
                 item {
@@ -83,7 +88,10 @@ fun GalleryScreen() {
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             for (art in row) {
                                 Box(modifier = Modifier.weight(1f)) {
-                                    ArtworkCard(art)
+                                    ArtworkCard(
+                                        art = art,
+                                        onArtistClick = onArtistClick
+                                    )
                                 }
                             }
                             if (row.size == 1) {
@@ -122,7 +130,10 @@ fun Header() {
 }
 
 @Composable
-fun FeaturedArtworkCard(artwork: Artwork) {
+fun FeaturedArtworkCard(
+    artwork: Artwork,
+    onArtistClick: (String) -> Unit = {}
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -143,7 +154,26 @@ fun FeaturedArtworkCard(artwork: Artwork) {
             }
             Column(modifier = Modifier.padding(12.dp)) {
                 Text(text = artwork.title, color = Color(0xFFE0E0E0), fontSize = 18.sp)
-                Text(text = artwork.artist, color = Color(0xFFD4AF37), fontSize = 14.sp)
+                Text(
+                    text = artwork.artist,
+                    color = Color(0xFFD4AF37),
+                    fontSize = 14.sp,
+                    modifier = Modifier.clickable {
+                        onArtistClick(artwork.artist)
+                    }
+                )
+                // Agregar precio fijo basado en el ID de la obra
+                val price = when (artwork.id) {
+                    1L -> 12500 // Noche Estrellada
+                    else -> (5000..15000).random()
+                }
+                Text(
+                    text = "$$price",
+                    color = Color(0xFF90EE90),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
                 if (!artwork.description.isNullOrBlank()) {
                     Text(text = artwork.description, color = Color(0xFFAAAAAA), fontSize = 13.sp, modifier = Modifier.padding(top = 8.dp))
                 }
@@ -153,7 +183,10 @@ fun FeaturedArtworkCard(artwork: Artwork) {
 }
 
 @Composable
-fun ArtworkCard(art: Artwork) {
+fun ArtworkCard(
+    art: Artwork,
+    onArtistClick: (String) -> Unit = {}
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -169,11 +202,46 @@ fun ArtworkCard(art: Artwork) {
                     .background(Color(0xFF333333)),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = art.title, color = Color(0xFF777777), fontStyle = androidx.compose.ui.text.font.FontStyle.Italic)
+                Text(
+                    text = art.title,
+                    color = Color(0xFF777777),
+                    fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                    fontSize = 12.sp
+                )
             }
-            Column(modifier = Modifier.padding(10.dp)) {
-                Text(text = art.title, color = Color(0xFFE0E0E0), fontSize = 14.sp)
-                Text(text = art.artist, color = Color(0xFFD4AF37), fontSize = 12.sp)
+            Column(
+                modifier = Modifier.padding(12.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = art.title,
+                    color = Color(0xFFE0E0E0),
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium
+                )
+                Text(
+                    text = art.artist,
+                    color = Color(0xFFD4AF37),
+                    fontSize = 12.sp,
+                    modifier = Modifier.clickable {
+                        onArtistClick(art.artist)
+                    }
+                )
+                // Agregar precio fijo basado en el ID de la obra
+                val price = when (art.id) {
+                    2L -> 8500  // La Gioconda
+                    3L -> 6200  // David
+                    4L -> 4750  // Impresión, sol naciente
+                    5L -> 3900  // Composición VIII
+                    6L -> 2100  // Retrato Desconocido
+                    else -> 3500
+                }
+                Text(
+                    text = "$$price",
+                    color = Color(0xFF90EE90),
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold
+                )
             }
         }
     }

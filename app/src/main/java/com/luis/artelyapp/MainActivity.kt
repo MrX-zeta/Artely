@@ -25,6 +25,7 @@ import com.luis.artelyapp.ui.auth.LoginScreen
 import com.luis.artelyapp.ui.auth.RegisterScreen
 import com.luis.artelyapp.ui.main.GalleryScreen
 import com.luis.artelyapp.ui.onboarding.WelcomeScreen
+import com.luis.artelyapp.ui.ArtistProfile.ArtistProfileScreen
 import com.luis.artelyapp.ui.theme.ArtelyAppTheme
 import androidx.compose.ui.platform.LocalContext
 
@@ -47,6 +48,7 @@ private sealed class Screen {
     object Register : Screen()
     object Login : Screen()
     object Gallery : Screen()
+    data class ArtistProfile(val artistName: String) : Screen()
 }
 
 @Composable
@@ -82,7 +84,15 @@ private fun RootContent() {
             onBack = { goBack() },
             onRegister = { navigateTo(Screen.Register) }
         )
-        is Screen.Gallery -> GalleryScreen()
+        is Screen.Gallery -> GalleryScreen(
+            onArtistClick = { artistName ->
+                navigateTo(Screen.ArtistProfile(artistName))
+            }
+        )
+        is Screen.ArtistProfile -> ArtistProfileScreen(
+            artistName = current.artistName,
+            onBackClick = { goBack() }
+        )
     }
 }
 
