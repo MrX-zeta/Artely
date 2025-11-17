@@ -3,7 +3,6 @@ package com.luis.artelyapp
 import android.app.Activity
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
@@ -12,7 +11,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
@@ -23,7 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.luis.artelyapp.ui.auth.LoginScreen
 import com.luis.artelyapp.ui.auth.RegisterScreen
-import com.luis.artelyapp.ui.main.GalleryScreen
+import com.luis.artelyapp.ui.navigation.NavManager
 import com.luis.artelyapp.ui.onboarding.WelcomeScreen
 import com.luis.artelyapp.ui.theme.ArtelyAppTheme
 import androidx.compose.ui.platform.LocalContext
@@ -65,8 +63,6 @@ private fun RootContent() {
         else activity?.finish()
     }
 
-    BackHandler(enabled = true) { goBack() }
-
     when (current) {
         is Screen.Welcome -> WelcomeScreen(
             onExplore = { navigateTo(Screen.Gallery) },
@@ -82,7 +78,7 @@ private fun RootContent() {
             onBack = { goBack() },
             onRegister = { navigateTo(Screen.Register) }
         )
-        is Screen.Gallery -> GalleryScreen()
+        is Screen.Gallery -> NavManager() // Usa el NavManager aquí
     }
 }
 
@@ -94,16 +90,11 @@ fun PhoneContainer(content: @Composable () -> Unit) {
 
     Box(
         modifier = Modifier
-            .clip(RoundedCornerShape(24.dp))
+            .fillMaxSize()
             .background(backgroundBrush)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             content()
         }
     }
-}
-
-@Composable
-fun HelloWorld(){
-    Text("El pepe")
 }
