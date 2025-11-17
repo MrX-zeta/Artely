@@ -28,10 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun GalleryScreen(
-    onNavigateToChat: () -> Unit = {},
-    onArtistClick: (String) -> Unit = {}
-) {
+fun GalleryScreen() {
     // Datos de ejemplo locales (temporal hasta conectar ViewModel/Repositorio)
     val artworksSample = listOf(
         Artwork(1, "Noche Estrellada", "Vincent van Gogh", "Una de las obras más reconocidas de Van Gogh, pintada en 1889."),
@@ -46,11 +43,7 @@ fun GalleryScreen(
         containerColor = Color.Transparent,
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
-            BottomNavigationBar(
-                onTabSelected = { tabIndex ->
-                    if (tabIndex == 1) onNavigateToChat()
-                }
-            )
+            BottomNavigationBar()
         }
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
@@ -71,7 +64,7 @@ fun GalleryScreen(
                         fontWeight = FontWeight.Light,
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
-                    FeaturedArtworkCard(artworksSample.first(), onArtistClick = onArtistClick)
+                    FeaturedArtworkCard(artworksSample.first())
                 }
 
                 item {
@@ -90,7 +83,7 @@ fun GalleryScreen(
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                             for (art in row) {
                                 Box(modifier = Modifier.weight(1f)) {
-                                    ArtworkCard(art, onArtistClick = onArtistClick)
+                                    ArtworkCard(art)
                                 }
                             }
                             if (row.size == 1) {
@@ -129,7 +122,7 @@ fun Header() {
 }
 
 @Composable
-fun FeaturedArtworkCard(artwork: Artwork, onArtistClick: (String) -> Unit = {}) {
+fun FeaturedArtworkCard(artwork: Artwork) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -150,12 +143,7 @@ fun FeaturedArtworkCard(artwork: Artwork, onArtistClick: (String) -> Unit = {}) 
             }
             Column(modifier = Modifier.padding(12.dp)) {
                 Text(text = artwork.title, color = Color(0xFFE0E0E0), fontSize = 18.sp)
-                Text(
-                    text = artwork.artist,
-                    color = Color(0xFFD4AF37),
-                    fontSize = 14.sp,
-                    modifier = Modifier.clickable { onArtistClick(artwork.artist) }
-                )
+                Text(text = artwork.artist, color = Color(0xFFD4AF37), fontSize = 14.sp)
                 if (!artwork.description.isNullOrBlank()) {
                     Text(text = artwork.description, color = Color(0xFFAAAAAA), fontSize = 13.sp, modifier = Modifier.padding(top = 8.dp))
                 }
@@ -165,7 +153,7 @@ fun FeaturedArtworkCard(artwork: Artwork, onArtistClick: (String) -> Unit = {}) 
 }
 
 @Composable
-fun ArtworkCard(art: Artwork, onArtistClick: (String) -> Unit = {}) {
+fun ArtworkCard(art: Artwork) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -185,22 +173,14 @@ fun ArtworkCard(art: Artwork, onArtistClick: (String) -> Unit = {}) {
             }
             Column(modifier = Modifier.padding(10.dp)) {
                 Text(text = art.title, color = Color(0xFFE0E0E0), fontSize = 14.sp)
-                Text(
-                    text = art.artist,
-                    color = Color(0xFFD4AF37),
-                    fontSize = 12.sp,
-                    modifier = Modifier.clickable { onArtistClick(art.artist) }
-                )
+                Text(text = art.artist, color = Color(0xFFD4AF37), fontSize = 12.sp)
             }
         }
     }
 }
 
 @Composable
-fun BottomNavigationBar(
-    currentTab: Int = 0,
-    onTabSelected: (Int) -> Unit = {}
-) {
+fun BottomNavigationBar() {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -213,12 +193,9 @@ fun BottomNavigationBar(
         // Cambiamos la etiqueta inferior de 'Buscar' a 'Chat' y mantenemos el icono de chat
         val items = listOf("Inicio" to "🏠", "Chat" to "💬", "Agregar" to "➕", "Perfil" to "👤")
         items.forEachIndexed { index, pair ->
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.clickable { onTabSelected(index) }
-            ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(text = pair.second, fontSize = 18.sp)
-                Text(text = pair.first, fontSize = 12.sp, color = if (index == currentTab) Color(0xFFD4AF37) else Color(0xFF888888))
+                Text(text = pair.first, fontSize = 12.sp, color = if (index == 0) Color(0xFFD4AF37) else Color(0xFF888888))
             }
         }
     }

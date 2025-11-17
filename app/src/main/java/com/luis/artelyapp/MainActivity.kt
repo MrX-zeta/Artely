@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
@@ -22,10 +23,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.luis.artelyapp.ui.auth.LoginScreen
 import com.luis.artelyapp.ui.auth.RegisterScreen
+import com.luis.artelyapp.ui.main.GalleryScreen
 import com.luis.artelyapp.ui.onboarding.WelcomeScreen
 import com.luis.artelyapp.ui.theme.ArtelyAppTheme
 import androidx.compose.ui.platform.LocalContext
-import com.luis.artelyapp.ui.navigation.NavManager
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,7 +35,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             ArtelyAppTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
-                    RootContent()
+                    PhoneContainer { RootContent() }
                 }
             }
         }
@@ -67,44 +68,42 @@ private fun RootContent() {
     BackHandler(enabled = true) { goBack() }
 
     when (current) {
-        is Screen.Welcome -> PhoneContainer { WelcomeScreen(
+        is Screen.Welcome -> WelcomeScreen(
             onExplore = { navigateTo(Screen.Gallery) },
             onGetStarted = { navigateTo(Screen.Register) }
-        ) }
-
-        is Screen.Register -> PhoneContainer { RegisterScreen(
+        )
+        is Screen.Register -> RegisterScreen(
             onRegistered = { navigateTo(Screen.Gallery) },
             onBack = { goBack() },
             onLogin = { navigateTo(Screen.Login) }
-        ) }
-
-        is Screen.Login -> PhoneContainer { LoginScreen(
+        )
+        is Screen.Login -> LoginScreen(
             onLogin = { navigateTo(Screen.Gallery) },
             onBack = { goBack() },
             onRegister = { navigateTo(Screen.Register) }
-        ) }
-
-        is Screen.Gallery -> PhoneContainer(clip = false) { NavManager() }
+        )
+        is Screen.Gallery -> GalleryScreen()
     }
 }
 
 @Composable
-fun PhoneContainer(clip: Boolean = true, content: @Composable () -> Unit) {
+fun PhoneContainer(content: @Composable () -> Unit) {
     val backgroundBrush = Brush.linearGradient(
         colors = listOf(Color(0xFF1A1A1A), Color(0xFF2D2D2D))
     )
 
-    val baseModifier = if (clip) {
-        Modifier.clip(RoundedCornerShape(24.dp)).background(backgroundBrush)
-    } else {
-        Modifier.background(backgroundBrush)
-    }
-
     Box(
-        modifier = baseModifier
+        modifier = Modifier
+            .clip(RoundedCornerShape(24.dp))
+            .background(backgroundBrush)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             content()
         }
     }
+}
+
+@Composable
+fun HelloWorld(){
+    Text("El pepe")
 }

@@ -1,6 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="AgentMigrationStateService">
-    <option name="migrationStatus" value="COMPLETED" />
+    <option name="pendingSessionIds">
+      <option value="a89db335-0040-43e7-8c94-f401144c8ae3" />
+      <option value="c9b6dc88-ae31-4187-b988-00239f0edb6d" />
+    </option>
+    <option name="pendingTurns">
+      <map>
+        <entry key="a89db335-0040-43e7-8c94-f401144c8ae3">
+          <value>
+            <set>
+              <option value="559209dc-ee22-4de8-a063-16d26e24eff3" />
+            </set>
+          </value>
+        </entry>
+        <entry key="c9b6dc88-ae31-4187-b988-00239f0edb6d">
+          <value>
+            <set>
+              <option value="9081b346-a655-4d92-8aa2-48333af04ed4" />
+              <option value="d4b09310-0627-44aa-92c1-0b76a096fc64" />
+              <option value="6884e13c-70df-4fba-964e-14d16db1d70c" />
+              <option value="357ecf1d-fed0-49fe-ba56-2f88650423aa" />
+              <option value="1e5f9d69-f215-4e13-9206-759f504dac76" />
+              <option value="a7f587ee-098c-4d1a-bbf4-363e4ac62404" />
+              <option value="2c6cd01f-e6b3-46fa-8a81-e33d93b66512" />
+            </set>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <pendingWorkingSetItems>
+      <entry key="c9b6dc88-ae31-4187-b988-00239f0edb6d">
+        <set>
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/ui/main/GalleryScreen.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/navigation/NavManager.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/MainActivity.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/view/ChatView.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/ui/ArtistProfile/Profile.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/ui/UserProfile/UserProfile.kt" />
+        </set>
+      </entry>
+    </pendingWorkingSetItems>
   </component>
 </project>
