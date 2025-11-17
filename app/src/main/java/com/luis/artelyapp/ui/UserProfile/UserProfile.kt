@@ -57,6 +57,7 @@ enum class UserProfileTab {
     FOR_SALE
 }
 
+@Suppress("UNUSED_PARAMETER")
 @Composable
 fun UserProfileScreen(
     onBackClick: () -> Unit = {},
@@ -91,85 +92,41 @@ fun UserProfileScreen(
     //     UserArtwork(8, "Composición en Azul", "Wassily Kandinsky", "$1,800", true)
     // )
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Transparent),
-        contentAlignment = Alignment.Center
-    ) {
-        Box(
-            modifier = Modifier
-                .width(430.dp)
-                .height(886.dp)
-                .shadow(
-                    elevation = 30.dp,
-                    shape = RoundedCornerShape(40.dp),
-                    ambientColor = Color.Black.copy(alpha = 0.5f),
-                    spotColor = Color.Black.copy(alpha = 0.5f)
-                )
-                .clip(RoundedCornerShape(40.dp))
-                .background(
-                    Brush.linearGradient(
-                        colors = listOf(Color(0xFF1A1A1A), Color(0xFF2D2D2D)),
-                        start = androidx.compose.ui.geometry.Offset(0f, 0f),
-                        end = androidx.compose.ui.geometry.Offset(1f, 1f)
-                    )
-                )
-                .border(
-                    width = 12.dp,
-                    color = Color.Black,
-                    shape = RoundedCornerShape(40.dp)
-                )
-        ) {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize()
-            ) {
-                item { TopBar(onBackClick = onBackClick) }
-                item {
-                    UserHeader(
-                        profile = userProfile,
-                        onEditProfile = onEditProfile
-                    )
-                }
-                item {
-                    TabSection(
-                        selectedTab = selectedTab,
-                        onTabSelected = { tab -> selectedTab = tab }
-                    )
-                }
-                item {
-                    CollectionsSection(
-                        artworks = when(selectedTab) {
-                            UserProfileTab.GALLERY -> galleryArtworks
-                            UserProfileTab.FOR_SALE -> forSaleArtworks
-                        }
-                    )
-                }
-                item { Spacer(modifier = Modifier.height(100.dp)) }
-            }
-
-            BottomNavigationBar(
-                modifier = Modifier.align(Alignment.BottomCenter)
-            )
+    // Usar Scaffold para que el contenido ocupe todo el espacio y el bottomBar quede fijo
+    Scaffold(
+        containerColor = DarkBackground,
+        bottomBar = {
+            BottomNavigationBar()
         }
-
-        // Gradient overlay
-        Box(
+    ) { innerPadding ->
+        LazyColumn(
             modifier = Modifier
-                .width(430.dp)
-                .height(886.dp)
-                .clip(RoundedCornerShape(40.dp))
-                .background(
-                    Brush.linearGradient(
-                        colors = listOf(
-                            AccentGold.copy(alpha = 0.03f),
-                            Color.Transparent,
-                            AccentGold.copy(alpha = 0.03f),
-                            Color.Transparent
-                        )
-                    )
+                .fillMaxSize()
+                .padding(innerPadding)
+        ) {
+            item { TopBar(onBackClick = onBackClick) }
+            item {
+                UserHeader(
+                    profile = userProfile,
+                    onEditProfile = onEditProfile
                 )
-        )
+            }
+            item {
+                TabSection(
+                    selectedTab = selectedTab,
+                    onTabSelected = { tab -> selectedTab = tab }
+                )
+            }
+            item {
+                CollectionsSection(
+                    artworks = when(selectedTab) {
+                        UserProfileTab.GALLERY -> galleryArtworks
+                        UserProfileTab.FOR_SALE -> forSaleArtworks
+                    }
+                )
+            }
+            // No spacer necesario; Scaffold gestiona el espacio con bottomBar
+        }
     }
 }
 
