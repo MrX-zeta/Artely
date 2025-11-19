@@ -1,6 +1,52 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="AgentMigrationStateService">
+<<<<<<< HEAD
     <option name="migrationStatus" value="COMPLETED" />
+=======
+    <option name="pendingSessionIds">
+      <option value="8ce77b5f-3668-43e8-8715-dcb850202924" />
+      <option value="a89db335-0040-43e7-8c94-f401144c8ae3" />
+    </option>
+    <option name="pendingTurns">
+      <map>
+        <entry key="8ce77b5f-3668-43e8-8715-dcb850202924">
+          <value>
+            <set>
+              <option value="17dd7e47-c6a8-4330-aff5-b87ee8d1e561" />
+              <option value="ddc02877-414d-4128-a2f8-f4e4044ec7ab" />
+              <option value="240403ea-6414-4ddd-9e92-29203a218497" />
+              <option value="2cf2886e-2f0a-4912-abe3-2f6b4270d81d" />
+              <option value="abff749d-a94d-41e4-91ea-ae77a9c95360" />
+              <option value="c00eaba4-d5c2-4b30-8218-4dfe6831292f" />
+              <option value="4c6c8a29-26a8-4a66-b101-87c1dbfc61e4" />
+              <option value="4795550a-7791-4c14-bff5-fe24441e25ac" />
+              <option value="aa6e9253-2063-49f0-8bfb-003437790a13" />
+              <option value="d47d3e7a-5e55-48cf-a75c-1ff8629778e4" />
+              <option value="649e54d8-2f64-4568-8e2a-f3a8245c64ff" />
+            </set>
+          </value>
+        </entry>
+        <entry key="a89db335-0040-43e7-8c94-f401144c8ae3">
+          <value>
+            <set>
+              <option value="559209dc-ee22-4de8-a063-16d26e24eff3" />
+            </set>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <pendingWorkingSetItems>
+      <entry key="8ce77b5f-3668-43e8-8715-dcb850202924">
+        <set>
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/ui/uploadwork/Upload.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/ui/UserProfile/UserProfile.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/navigation/NavManager.kt" />
+          <option value="file://$PROJECT_DIR$/app/build.gradle.kts" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/ui/UserProfile/UserProfileViewModel.kt" />
+        </set>
+      </entry>
+    </pendingWorkingSetItems>
+>>>>>>> origin/user-profile-artworks
   </component>
 </project>

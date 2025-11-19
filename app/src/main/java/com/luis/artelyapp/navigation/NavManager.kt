@@ -2,6 +2,7 @@ package com.luis.artelyapp.ui.navigation
 
 import android.net.Uri
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -12,6 +13,9 @@ import com.luis.artelyapp.ui.view.ChatView
 import com.luis.artelyapp.ui.view.MessageView
 import com.luis.artelyapp.ui.ArtistProfile.ArtistProfileScreen
 import com.luis.artelyapp.ui.UserProfile.UserProfileScreen
+import com.luis.artelyapp.ui.UserProfile.UserProfileViewModel
+import com.luis.artelyapp.ui.uploadwork.Upload
+import com.luis.artelyapp.ui.CreatePost.CreatePostScreen
 
 sealed class Screen(val route: String) {
     object Gallery : Screen("gallery")
@@ -23,11 +27,14 @@ sealed class Screen(val route: String) {
         fun createRoute(artistName: String) = "profile/${Uri.encode(artistName)}"
     }
     object UserProfile : Screen("userprofile")
+    object Upload : Screen("upload")
+    object CreatePost : Screen("createpost")
 }
 
 @Composable
 fun NavManager() {
     val navController = rememberNavController()
+    val userProfileViewModel: UserProfileViewModel = viewModel()
 
     NavHost(
         navController = navController,
@@ -79,7 +86,36 @@ fun NavManager() {
         }
 
         composable(Screen.UserProfile.route) {
-            UserProfileScreen(onBackClick = { navController.popBackStack() })
+            UserProfileScreen(
+                onBackClick = { navController.popBackStack() },
+                onNavigateToUpload = { navController.navigate(Screen.Upload.route) },
+                onNavigateToGallery = { navController.navigate(Screen.Gallery.route) },
+                onNavigateToSearch = { navController.navigate(Screen.Gallery.route) }, // Por ahora va a Gallery
+                onNavigateToCreate = { navController.navigate(Screen.CreatePost.route) },
+                viewModel = userProfileViewModel
+            )
+        }
+
+        composable(Screen.Upload.route) {
+            Upload(
+                onBackClick = { navController.popBackStack() },
+                onPublishWork = { title, description, imageUri ->
+                    // Agregar la obra al ViewModel
+                    userProfileViewModel.addArtwork(title, description, imageUri)
+                    // Regresar a UserProfile
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable(Screen.CreatePost.route) {
+            CreatePostScreen(
+                onBackClick = { navController.popBackStack() },
+                onPublishPost = { title, description ->
+                    // Por ahora solo regresamos a la pantalla anterior
+                    navController.popBackStack()
+                }
+            )
         }
     }
 }

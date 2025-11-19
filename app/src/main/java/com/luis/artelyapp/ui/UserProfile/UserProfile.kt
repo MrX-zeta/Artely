@@ -15,6 +15,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -22,6 +23,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import androidx.compose.ui.platform.LocalContext
 
 // Colores de la paleta
 private val DarkBackground = Color(0xFF1A1A1A)
@@ -48,6 +53,8 @@ data class UserArtwork(
     val id: Int,
     val title: String,
     val artist: String,
+    val description: String = "",
+    val imageUri: android.net.Uri? = null,
     val price: String? = null,
     val isForSale: Boolean = false
 )
@@ -61,9 +68,15 @@ enum class UserProfileTab {
 @Composable
 fun UserProfileScreen(
     onBackClick: () -> Unit = {},
-    onEditProfile: () -> Unit = {}
+    onEditProfile: () -> Unit = {},
+    onNavigateToUpload: () -> Unit = {},
+    onNavigateToGallery: () -> Unit = {},
+    onNavigateToSearch: () -> Unit = {},
+    onNavigateToCreate: () -> Unit = {},
+    viewModel: UserProfileViewModel = viewModel()
 ) {
     var selectedTab by remember { mutableStateOf(UserProfileTab.GALLERY) }
+    val userArtworks by viewModel.userArtworks.collectAsState()
 
     // Datos de ejemplo del usuario
     val userProfile = UserProfileData(
@@ -71,32 +84,24 @@ fun UserProfileScreen(
         bio = "Artista visual especializado en retratos\ncontemporáneos y arte figurativo",
         location = "París, Francia",
         avatarLetter = "A",
-        artworksCount = 127,
+        artworksCount = userArtworks.size, // Usar el conteo real
         followersCount = "2.3K",
         followingCount = 38
     )
 
-    val galleryArtworks = listOf<UserArtwork>() // Temporalmente vacío para probar
-    // val galleryArtworks = listOf(
-    //     UserArtwork(1, "La Gioconda", "Leonardo da Vinci"),
-    //     UserArtwork(2, "Retrato Contemporáneo", "Aristote"),
-    //     UserArtwork(3, "Noche Estrellada", "Vincent van Gogh"),
-    //     UserArtwork(4, "Las Meninas", "Diego Velázquez"),
-    //     UserArtwork(5, "La Persistencia de la Memoria", "Salvador Dalí")
-    // )
-
-    val forSaleArtworks = listOf<UserArtwork>() // Temporalmente vacío para probar
-    // val forSaleArtworks = listOf(
-    //     UserArtwork(6, "Reflejos", "Aristote", "$2,100", true),
-    //     UserArtwork(7, "Autorretrato Moderno", "Pablo Picasso", "$3,500", true),
-    //     UserArtwork(8, "Composición en Azul", "Wassily Kandinsky", "$1,800", true)
-    // )
+    val galleryArtworks = userArtworks.filter { !it.isForSale }
+    val forSaleArtworks = userArtworks.filter { it.isForSale }
 
     // Usar Scaffold para que el contenido ocupe todo el espacio y el bottomBar quede fijo
     Scaffold(
         containerColor = DarkBackground,
         bottomBar = {
-            BottomNavigationBar()
+            BottomNavigationBar(
+                onNavigateToGallery = onNavigateToGallery,
+                onNavigateToSearch = onNavigateToSearch,
+                onNavigateToCreate = onNavigateToCreate,
+                onNavigateToProfile = { /* Ya estamos en perfil */ }
+            )
         }
     ) { innerPadding ->
         LazyColumn(
@@ -122,7 +127,8 @@ fun UserProfileScreen(
                     artworks = when(selectedTab) {
                         UserProfileTab.GALLERY -> galleryArtworks
                         UserProfileTab.FOR_SALE -> forSaleArtworks
-                    }
+                    },
+                    onNavigateToUpload = onNavigateToUpload
                 )
             }
             // No spacer necesario; Scaffold gestiona el espacio con bottomBar
@@ -415,7 +421,8 @@ private fun TabSection(
 
 @Composable
 private fun CollectionsSection(
-    artworks: List<UserArtwork>
+    artworks: List<UserArtwork>,
+    onNavigateToUpload: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -453,9 +460,9 @@ private fun CollectionsSection(
                 )
             }
 
-            // Add Post Button (sin funcionalidad pero con colores originales)
+            // Add Post Button (ahora funcional)
             Button(
-                onClick = { /* No hace nada */ },
+                onClick = onNavigateToUpload,
                 modifier = Modifier
                     .size(40.dp),
                 colors = ButtonDefaults.buttonColors(
@@ -551,17 +558,19 @@ private fun CollectionsSection(
 
 @Composable
 private fun UserArtworkCard(artwork: UserArtwork) {
+    val context = LocalContext.current
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(200.dp), // Mantener altura para acomodar más texto
+            .height(220.dp), // Aumentar altura para más texto
         colors = CardDefaults.cardColors(
             containerColor = CardBackground
         ),
         shape = RoundedCornerShape(12.dp)
     ) {
         Column {
-            // Image placeholder
+            // Image area
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -573,31 +582,51 @@ private fun UserArtworkCard(artwork: UserArtwork) {
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = "Retrato",
-                    color = Color(0xFF777777),
-                    fontSize = 14.sp,
-                    fontStyle = FontStyle.Italic
-                )
+                if (artwork.imageUri != null) {
+                    AsyncImage(
+                        model = ImageRequest.Builder(context)
+                            .data(artwork.imageUri)
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = artwork.title,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Text(
+                        text = "Retrato",
+                        color = Color(0xFF777777),
+                        fontSize = 14.sp,
+                        fontStyle = FontStyle.Italic
+                    )
+                }
             }
 
-            // Card content
+            // Card content - usando Column con peso flexible
             Column(
                 modifier = Modifier
-                    .padding(12.dp) // Aumentar padding
-                    .fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(6.dp) // Más espacio entre elementos
+                    .padding(12.dp)
+                    .fillMaxWidth()
+                    .weight(1f), // Usar peso flexible para el contenido
+                verticalArrangement = Arrangement.SpaceBetween // Distribuir espacio entre elementos
             ) {
+                // Título con manejo inteligente de líneas
                 Text(
                     text = artwork.title,
                     color = TextLight,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Normal,
-                    maxLines = 2, // Permitir 2 líneas para el título
+                    maxLines = if (artwork.title.contains("\n")) 3 else 2, // Más líneas si tiene enter
                     overflow = TextOverflow.Ellipsis,
-                    lineHeight = 18.sp
+                    lineHeight = 16.sp // Reducir altura de línea para aprovechar espacio
                 )
 
+                // Spacer que se adapta al contenido
+                Spacer(modifier = Modifier.height(4.dp))
+
+                // Información del artista o precio - siempre visible
                 if (artwork.isForSale && artwork.price != null) {
                     Text(
                         text = artwork.price,
@@ -614,7 +643,7 @@ private fun UserArtworkCard(artwork: UserArtwork) {
                         fontWeight = FontWeight.Normal,
                         maxLines = 2, // Permitir 2 líneas para nombres largos
                         overflow = TextOverflow.Ellipsis,
-                        lineHeight = 16.sp
+                        lineHeight = 14.sp
                     )
                 }
             }
@@ -624,7 +653,11 @@ private fun UserArtworkCard(artwork: UserArtwork) {
 
 @Composable
 private fun BottomNavigationBar(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onNavigateToGallery: () -> Unit = {},
+    onNavigateToSearch: () -> Unit = {},
+    onNavigateToCreate: () -> Unit = {},
+    onNavigateToProfile: () -> Unit = {}
 ) {
     Box(
         modifier = modifier
@@ -639,10 +672,30 @@ private fun BottomNavigationBar(
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            BottomNavItem("🏠", "Inicio", isSelected = false)
-            BottomNavItem("🔍", "Buscar", isSelected = false)
-            BottomNavItem("🎨", "Crear", isSelected = false)
-            BottomNavItem("👤", "Perfil", isSelected = true)
+            BottomNavItem(
+                icon = "🏠",
+                label = "Inicio",
+                isSelected = false,
+                onClick = onNavigateToGallery
+            )
+            BottomNavItem(
+                icon = "🔍",
+                label = "Buscar",
+                isSelected = false,
+                onClick = onNavigateToSearch
+            )
+            BottomNavItem(
+                icon = "🎨",
+                label = "Crear",
+                isSelected = false,
+                onClick = onNavigateToCreate
+            )
+            BottomNavItem(
+                icon = "👤",
+                label = "Perfil",
+                isSelected = true,
+                onClick = onNavigateToProfile
+            )
         }
 
         // Línea superior
@@ -658,7 +711,8 @@ private fun BottomNavigationBar(
 private fun BottomNavItem(
     icon: String,
     label: String,
-    isSelected: Boolean
+    isSelected: Boolean,
+    onClick: () -> Unit = {}
 ) {
     val backgroundColor = if (isSelected) AccentGold.copy(alpha = 0.1f) else Color.Transparent
     val textColor = if (isSelected) AccentGold else TextSecondary
@@ -666,7 +720,8 @@ private fun BottomNavItem(
     Column(
         modifier = Modifier
             .size(60.dp, 58.dp)
-            .background(backgroundColor, RoundedCornerShape(8.dp)),
+            .background(backgroundColor, RoundedCornerShape(8.dp))
+            .clickable { onClick() },
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
