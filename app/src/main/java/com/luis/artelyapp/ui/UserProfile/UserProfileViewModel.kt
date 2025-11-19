@@ -6,7 +6,17 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
+data class UserProfileInfo(
+    val name: String = "Aristote",
+    val bio: String = "Artista visual especializado en retratos contemporáneos y arte figurativo",
+    val location: String = "París, Francia",
+    val profileImageUri: Uri? = null
+)
+
 class UserProfileViewModel : ViewModel() {
+    private val _userProfile = MutableStateFlow(UserProfileInfo())
+    val userProfile: StateFlow<UserProfileInfo> = _userProfile.asStateFlow()
+
     private val _userArtworks = MutableStateFlow<List<UserArtwork>>(
         // Agregar algunas obras de ejemplo para probar
         listOf(
@@ -51,5 +61,14 @@ class UserProfileViewModel : ViewModel() {
                 artwork
             }
         }
+    }
+
+    fun updateProfile(name: String, bio: String, location: String, profileImageUri: Uri?) {
+        _userProfile.value = UserProfileInfo(
+            name = name,
+            bio = bio,
+            location = location,
+            profileImageUri = profileImageUri
+        )
     }
 }

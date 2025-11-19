@@ -13,6 +13,7 @@
               <option value="89b269e3-e86b-4320-87e6-c647eeabc754" />
               <option value="51774504-5576-4117-9515-8cfa2da97b03" />
               <option value="ceaf4a50-7e19-48b7-a47e-62eb64638810" />
+              <option value="5fe54c6e-1e0e-4b69-8fff-62ed99e2a83f" />
             </set>
           </value>
         </entry>
@@ -22,6 +23,10 @@
       <entry key="c9b6dc88-ae31-4187-b988-00239f0edb6d">
         <set>
           <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/ui/uploadwork/Upload.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/ui/UserProfile/EditProfileScreen.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/ui/UserProfile/UserProfileViewModel.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/navigation/NavManager.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/ui/UserProfile/UserProfile.kt" />
         </set>
       </entry>
     </pendingWorkingSetItems>

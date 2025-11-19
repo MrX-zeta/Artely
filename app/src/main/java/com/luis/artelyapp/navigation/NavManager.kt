@@ -14,6 +14,7 @@ import com.luis.artelyapp.ui.view.MessageView
 import com.luis.artelyapp.ui.ArtistProfile.ArtistProfileScreen
 import com.luis.artelyapp.ui.UserProfile.UserProfileScreen
 import com.luis.artelyapp.ui.UserProfile.UserProfileViewModel
+import com.luis.artelyapp.ui.UserProfile.EditProfileScreen
 import com.luis.artelyapp.ui.uploadwork.Upload
 import com.luis.artelyapp.ui.CreatePost.CreatePostScreen
 
@@ -27,6 +28,7 @@ sealed class Screen(val route: String) {
         fun createRoute(artistName: String) = "profile/${Uri.encode(artistName)}"
     }
     object UserProfile : Screen("userprofile")
+    object EditProfile : Screen("editprofile")
     object Upload : Screen("upload")
     object CreatePost : Screen("createpost")
 }
@@ -88,10 +90,21 @@ fun NavManager() {
         composable(Screen.UserProfile.route) {
             UserProfileScreen(
                 onBackClick = { navController.popBackStack() },
+                onEditProfile = { navController.navigate(Screen.EditProfile.route) },
                 onNavigateToUpload = { navController.navigate(Screen.Upload.route) },
                 onNavigateToGallery = { navController.navigate(Screen.Gallery.route) },
                 onNavigateToSearch = { navController.navigate(Screen.Gallery.route) }, // Por ahora va a Gallery
                 onNavigateToCreate = { navController.navigate(Screen.CreatePost.route) },
+                viewModel = userProfileViewModel
+            )
+        }
+
+        composable(Screen.EditProfile.route) {
+            EditProfileScreen(
+                onBackClick = { navController.popBackStack() },
+                onSave = { name, bio, location, profileImageUri ->
+                    userProfileViewModel.updateProfile(name, bio, location, profileImageUri)
+                },
                 viewModel = userProfileViewModel
             )
         }

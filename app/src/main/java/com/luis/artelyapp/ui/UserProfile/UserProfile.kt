@@ -77,14 +77,15 @@ fun UserProfileScreen(
 ) {
     var selectedTab by remember { mutableStateOf(UserProfileTab.GALLERY) }
     val userArtworks by viewModel.userArtworks.collectAsState()
+    val userProfileInfo by viewModel.userProfile.collectAsState()
 
-    // Datos de ejemplo del usuario
+    // Datos del usuario desde el ViewModel
     val userProfile = UserProfileData(
-        name = "Aristote",
-        bio = "Artista visual especializado en retratos\ncontemporáneos y arte figurativo",
-        location = "París, Francia",
-        avatarLetter = "A",
-        artworksCount = userArtworks.size, // Usar el conteo real
+        name = userProfileInfo.name,
+        bio = userProfileInfo.bio,
+        location = userProfileInfo.location,
+        avatarLetter = userProfileInfo.name.firstOrNull()?.toString()?.uppercase() ?: "A",
+        artworksCount = userArtworks.size,
         followersCount = "2.3K",
         followingCount = 38
     )
