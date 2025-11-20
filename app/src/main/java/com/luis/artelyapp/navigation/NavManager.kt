@@ -16,6 +16,7 @@ import com.luis.artelyapp.ui.UserProfile.UserProfileScreen
 import com.luis.artelyapp.ui.UserProfile.UserProfileViewModel
 import com.luis.artelyapp.ui.UserProfile.EditProfileScreen
 import com.luis.artelyapp.ui.uploadwork.Upload
+import com.luis.artelyapp.ui.EditArtwork.EditArtworkScreen
 import com.luis.artelyapp.ui.CreatePost.CreatePostScreen
 
 sealed class Screen(val route: String) {
@@ -30,6 +31,9 @@ sealed class Screen(val route: String) {
     object UserProfile : Screen("userprofile")
     object EditProfile : Screen("editprofile")
     object Upload : Screen("upload")
+    object EditArtwork : Screen("editartwork/{artworkId}") {
+        fun createRoute(artworkId: Int) = "editartwork/$artworkId"
+    }
     object CreatePost : Screen("createpost")
 }
 
@@ -60,7 +64,10 @@ fun NavManager() {
             ChatView(
                 onNavigateToMessage = { chatId ->
                     navController.navigate(Screen.Message.createRoute(chatId))
-                }
+                },
+                onNavigateToGallery = { navController.navigate(Screen.Gallery.route) },
+                onNavigateToCreate = { navController.navigate(Screen.CreatePost.route) },
+                onNavigateToProfile = { navController.navigate(Screen.UserProfile.route) }
             )
         }
 
@@ -71,7 +78,10 @@ fun NavManager() {
             )
         ) { backStackEntry ->
             val chatId = backStackEntry.arguments?.getInt("chatId") ?: 0
-            MessageView(chatId = chatId)
+            MessageView(
+                chatId = chatId,
+                onBackClick = { navController.popBackStack() }
+            )
         }
 
         composable(
@@ -92,6 +102,9 @@ fun NavManager() {
                 onBackClick = { navController.popBackStack() },
                 onEditProfile = { navController.navigate(Screen.EditProfile.route) },
                 onNavigateToUpload = { navController.navigate(Screen.Upload.route) },
+                onEditArtwork = { artworkId ->
+                    navController.navigate(Screen.EditArtwork.createRoute(artworkId))
+                },
                 onNavigateToGallery = { navController.navigate(Screen.Gallery.route) },
                 onNavigateToSearch = { navController.navigate(Screen.Gallery.route) }, // Por ahora va a Gallery
                 onNavigateToCreate = { navController.navigate(Screen.CreatePost.route) },
@@ -119,6 +132,31 @@ fun NavManager() {
                     navController.popBackStack()
                 }
             )
+        }
+
+        composable(
+            route = Screen.EditArtwork.route,
+            arguments = listOf(
+                navArgument("artworkId") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+            val artworkId = backStackEntry.arguments?.getInt("artworkId") ?: 0
+            val artwork = userProfileViewModel.getArtworkById(artworkId)
+
+            if (artwork != null) {
+                EditArtworkScreen(
+                    artworkId = artworkId,
+                    currentTitle = artwork.title,
+                    currentDescription = artwork.description,
+                    currentImageUri = artwork.imageUri,
+                    currentIsForSale = artwork.isForSale,
+                    onBackClick = { navController.popBackStack() },
+                    onSaveChanges = { id, title, description, imageUri, isForSale ->
+                        userProfileViewModel.updateArtwork(id, title, description, imageUri, isForSale)
+                        navController.popBackStack()
+                    }
+                )
+            }
         }
 
         composable(Screen.CreatePost.route) {

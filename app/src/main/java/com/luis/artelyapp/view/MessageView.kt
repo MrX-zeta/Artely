@@ -1,7 +1,6 @@
 package com.luis.artelyapp.ui.view
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,7 +17,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
@@ -40,14 +39,16 @@ import com.luis.artelyapp.ui.view.viewmodel.MessageViewModel
 
 @Composable
 fun MessageView(
-    chatId: Int = 0
+    chatId: Int = 0,
+    onBackClick: () -> Unit = {}
 ) {
     val viewModel: MessageViewModel = viewModel()
     val messages by viewModel.messages.collectAsState()
     val currentMessage by viewModel.currentMessage.collectAsState()
 
     Scaffold(
-        topBar = { MessageHeader() },
+        containerColor = Color(0xFF1A1A1A),
+        topBar = { MessageHeader(onBackClick = onBackClick) },
         bottomBar = {
             MessageInput(
                 currentMessage = currentMessage,
@@ -74,44 +75,66 @@ fun MessageView(
 }
 
 @Composable
-fun MessageHeader() {
+fun MessageHeader(onBackClick: () -> Unit = {}) {
     Surface(color = Color(0xFF2A2A2A)) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = Modifier.fillMaxWidth()
         ) {
-            // Avatar
-            Box(
+            // Spacer para status bar
+            Spacer(modifier = Modifier.height(40.dp))
+
+            Row(
                 modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .background(Color(0xFFD4AF37)),
-                contentAlignment = Alignment.Center
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "FL",
-                    color = Color.Black,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 14.sp
-                )
-            }
+                // Flecha de regreso
+                IconButton(
+                    onClick = onBackClick,
+                    modifier = Modifier.size(40.dp)
+                ) {
+                    Text(
+                        text = "←",
+                        color = Color(0xFFD4AF37),
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Normal
+                    )
+                }
 
-            Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(8.dp))
 
-            Column {
-                Text(
-                    text = "Francisco Lopez",
-                    color = Color.White,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium
-                )
-                Text(
-                    text = "En línea",
-                    color = Color(0xFF4CAF50),
-                    fontSize = 12.sp
-                )
+                // Avatar
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFFD4AF37)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "FL",
+                        color = Color.Black,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(12.dp))
+
+                Column {
+                    Text(
+                        text = "Francisco Lopez",
+                        color = Color.White,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                    Text(
+                        text = "En línea",
+                        color = Color(0xFF4CAF50),
+                        fontSize = 12.sp
+                    )
+                }
             }
         }
     }
@@ -166,7 +189,7 @@ fun MessageInput(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(horizontal = 16.dp, vertical = 15.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             BasicTextField(
@@ -175,7 +198,7 @@ fun MessageInput(
                 modifier = Modifier
                     .weight(1f)
                     .background(Color(0xFF1A1A1A), RoundedCornerShape(24.dp))
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                    .padding(horizontal = 16.dp, vertical = 15.dp),
                 textStyle = androidx.compose.ui.text.TextStyle(color = Color.White),
                 decorationBox = { innerTextField ->
                     if (currentMessage.isEmpty()) {
@@ -194,11 +217,11 @@ fun MessageInput(
             IconButton(
                 onClick = onSendMessage,
                 modifier = Modifier
-                    .size(48.dp)
+                    .size(50.dp)
                     .background(Color(0xFFD4AF37), CircleShape)
             ) {
                 Icon(
-                    imageVector = Icons.Default.Send,
+                    imageVector = Icons.AutoMirrored.Filled.Send,
                     contentDescription = "Enviar mensaje",
                     tint = Color.Black
                 )

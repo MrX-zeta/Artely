@@ -16,7 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -27,7 +27,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -38,13 +37,24 @@ import com.luis.artelyapp.ui.view.viewmodel.ChatViewModel
 
 @Composable
 fun ChatView(
-    onNavigateToMessage: (Int) -> Unit = {} // Recibe el id del chat
+    onNavigateToMessage: (Int) -> Unit = {}, // Recibe el id del chat
+    onNavigateToGallery: () -> Unit = {},
+    onNavigateToCreate: () -> Unit = {},
+    onNavigateToProfile: () -> Unit = {}
 ) {
     val viewModel: ChatViewModel = viewModel()
     val chats by viewModel.chats.collectAsState()
 
     Scaffold(
-        topBar = { ChatListHeader() }
+        containerColor = Color(0xFF1A1A1A),
+        topBar = { ChatListHeader() },
+        bottomBar = {
+            BottomNavigationBar(
+                onNavigateToGallery = onNavigateToGallery,
+                onNavigateToCreate = onNavigateToCreate,
+                onNavigateToProfile = onNavigateToProfile
+            )
+        }
     ) { padding ->
         Column(
             modifier = Modifier
@@ -70,7 +80,7 @@ fun ChatView(
                         chat = chat,
                         onChatClick = { onNavigateToMessage(chat.id_Chat) }
                     )
-                    Divider(color = Color(0xFF2A2A2A), thickness = 1.dp)
+                    HorizontalDivider(color = Color(0xFF2A2A2A), thickness = 1.dp)
                 }
             }
         }
@@ -80,15 +90,22 @@ fun ChatView(
 @Composable
 fun ChatListHeader() {
     Surface(color = Color(0xFF2A2A2A)) {
-        Text(
-            text = "Artely",
-            color = Color.White,
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        )
+        Column(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            // Spacer para status bar
+            Spacer(modifier = Modifier.height(40.dp))
+
+            Text(
+                text = "Artely",
+                color = Color.White,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
+            )
+        }
     }
 }
 
@@ -153,6 +170,41 @@ fun ChatItem(
                 fontSize = 14.sp,
                 maxLines = 2
             )
+        }
+    }
+}
+
+@Composable
+private fun BottomNavigationBar(
+    onNavigateToGallery: () -> Unit = {},
+    onNavigateToCreate: () -> Unit = {},
+    onNavigateToProfile: () -> Unit = {}
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(80.dp)
+            .background(Color(0xFF1A1A1A))
+            .padding(horizontal = 12.dp),
+        horizontalArrangement = Arrangement.SpaceAround,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Cambiamos la etiqueta inferior de 'Buscar' a 'Chat' y mantenemos el icono de chat
+        val items = listOf("Inicio" to "🏠", "Chat" to "💬", "Agregar" to "➕", "Perfil" to "👤")
+        val callbacks = listOf(onNavigateToGallery, {}, onNavigateToCreate, onNavigateToProfile)
+
+        items.forEachIndexed { index, pair ->
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.clickable { callbacks[index]() }
+            ) {
+                Text(text = pair.second, fontSize = 18.sp)
+                Text(
+                    text = pair.first,
+                    fontSize = 12.sp,
+                    color = if (index == 1) Color(0xFFD4AF37) else Color(0xFF888888)
+                )
+            }
         }
     }
 }

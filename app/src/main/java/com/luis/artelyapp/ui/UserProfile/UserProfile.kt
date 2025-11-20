@@ -70,6 +70,7 @@ fun UserProfileScreen(
     onBackClick: () -> Unit = {},
     onEditProfile: () -> Unit = {},
     onNavigateToUpload: () -> Unit = {},
+    onEditArtwork: (Int) -> Unit = {},
     onNavigateToGallery: () -> Unit = {},
     onNavigateToSearch: () -> Unit = {},
     onNavigateToCreate: () -> Unit = {},
@@ -130,7 +131,8 @@ fun UserProfileScreen(
                         UserProfileTab.FOR_SALE -> forSaleArtworks
                     },
                     selectedTab = selectedTab,
-                    onNavigateToUpload = onNavigateToUpload
+                    onNavigateToUpload = onNavigateToUpload,
+                    onEditArtwork = onEditArtwork
                 )
             }
             // No spacer necesario; Scaffold gestiona el espacio con bottomBar
@@ -425,7 +427,8 @@ private fun TabSection(
 private fun CollectionsSection(
     artworks: List<UserArtwork>,
     selectedTab: UserProfileTab,
-    onNavigateToUpload: () -> Unit = {}
+    onNavigateToUpload: () -> Unit = {},
+    onEditArtwork: (Int) -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -547,7 +550,10 @@ private fun CollectionsSection(
                         Box(
                             modifier = Modifier.weight(1f)
                         ) {
-                            UserArtworkCard(artwork)
+                            UserArtworkCard(
+                                artwork = artwork,
+                                onEditClick = { onEditArtwork(artwork.id) }
+                            )
                         }
                     }
 
@@ -566,7 +572,10 @@ private fun CollectionsSection(
 }
 
 @Composable
-private fun UserArtworkCard(artwork: UserArtwork) {
+private fun UserArtworkCard(
+    artwork: UserArtwork,
+    onEditClick: () -> Unit = {}
+) {
     val context = LocalContext.current
 
     Card(
@@ -610,6 +619,29 @@ private fun UserArtworkCard(artwork: UserArtwork) {
                         fontSize = 14.sp,
                         fontStyle = FontStyle.Italic
                     )
+                }
+
+                // Ícono de editar (lápiz) en la esquina superior derecha
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(8.dp),
+                    contentAlignment = Alignment.TopEnd
+                ) {
+                    IconButton(
+                        onClick = onEditClick,
+                        modifier = Modifier
+                            .size(32.dp)
+                            .background(
+                                color = Color.Black.copy(alpha = 0.6f),
+                                shape = CircleShape
+                            )
+                    ) {
+                        Text(
+                            text = "✏️",
+                            fontSize = 16.sp
+                        )
+                    }
                 }
             }
 

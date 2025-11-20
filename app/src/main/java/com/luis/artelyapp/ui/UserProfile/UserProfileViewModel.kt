@@ -53,6 +53,25 @@ class UserProfileViewModel : ViewModel() {
         }
     }
 
+    fun updateArtwork(artworkId: Int, title: String, description: String, imageUri: Uri?, isForSale: Boolean) {
+        _userArtworks.value = _userArtworks.value.map { artwork ->
+            if (artwork.id == artworkId) {
+                artwork.copy(
+                    title = title,
+                    description = description,
+                    imageUri = imageUri,
+                    isForSale = isForSale
+                )
+            } else {
+                artwork
+            }
+        }
+    }
+
+    fun getArtworkById(artworkId: Int): UserArtwork? {
+        return _userArtworks.value.find { it.id == artworkId }
+    }
+
     fun updateProfile(name: String, bio: String, location: String, profileImageUri: Uri?) {
         _userProfile.value = UserProfileInfo(
             name = name,
