@@ -3,25 +3,42 @@
   <component name="AgentMigrationStateService">
     <option name="pendingSessionIds">
       <option value="c9b6dc88-ae31-4187-b988-00239f0edb6d" />
+      <option value="e533075e-fb18-4af0-93f7-e5a4e40566f3" />
     </option>
     <option name="pendingTurns">
       <map>
         <entry key="c9b6dc88-ae31-4187-b988-00239f0edb6d">
           <value>
             <set>
-              <option value="dbcc3708-af98-456d-b8f3-d3d5949f6b8b" />
-              <option value="89b269e3-e86b-4320-87e6-c647eeabc754" />
               <option value="51774504-5576-4117-9515-8cfa2da97b03" />
+              <option value="89b269e3-e86b-4320-87e6-c647eeabc754" />
               <option value="ceaf4a50-7e19-48b7-a47e-62eb64638810" />
+              <option value="dbcc3708-af98-456d-b8f3-d3d5949f6b8b" />
+            </set>
+          </value>
+        </entry>
+        <entry key="e533075e-fb18-4af0-93f7-e5a4e40566f3">
+          <value>
+            <set>
+              <option value="91e77dd7-5e96-4ff2-9dda-890b34165733" />
+              <option value="ca30381a-2edf-44d8-a824-837c7dba301c" />
+              <option value="7209852e-e977-46e0-88a4-3c6a7f93aab2" />
+              <option value="9774fe77-0cee-4e86-bbbf-9c4b78d2bbc2" />
+              <option value="99523915-c849-4e2e-a54e-16ec4470e8d2" />
+              <option value="9f7c9ae3-7462-44af-a5d9-6af6c167fd89" />
             </set>
           </value>
         </entry>
       </map>
     </option>
     <pendingWorkingSetItems>
-      <entry key="c9b6dc88-ae31-4187-b988-00239f0edb6d">
+      <entry key="c9b6dc88-ae31-4187-b988-00239f0edb6d" />
+      <entry key="e533075e-fb18-4af0-93f7-e5a4e40566f3">
         <set>
           <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/ui/uploadwork/Upload.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/ui/UserProfile/UserProfileViewModel.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/navigation/NavManager.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/ui/UserProfile/UserProfile.kt" />
         </set>
       </entry>
     </pendingWorkingSetItems>
