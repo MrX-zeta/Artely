@@ -581,7 +581,7 @@ private fun UserArtworkCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(240.dp), // Aumentar altura ligeramente para acomodar mejor el contenido
+            .height(200.dp),
         colors = CardDefaults.cardColors(
             containerColor = CardBackground
         ),
@@ -645,13 +645,12 @@ private fun UserArtworkCard(
                 }
             }
 
-            // Card content - usando Column con distribución más controlada
+            // Card content
             Column(
                 modifier = Modifier
-                    .padding(12.dp)
-                    .fillMaxWidth()
-                    .fillMaxHeight(), // Usar toda la altura disponible
-                verticalArrangement = Arrangement.SpaceBetween
+                    .padding(10.dp)
+                    .fillMaxWidth(),
+                verticalArrangement = Arrangement.Top
             ) {
                 // Título con altura máxima controlada
                 Text(
@@ -659,21 +658,21 @@ private fun UserArtworkCard(
                     color = TextLight,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Normal,
-                    maxLines = if (artwork.title.contains("\n")) 2 else 2, // Limitar a 2 líneas máximo
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
-                    lineHeight = 16.sp,
-                    modifier = Modifier.weight(1f, fill = false) // Permitir que crezca pero no más del necesario
+                    lineHeight = 16.sp
                 )
 
-                // Información del artista - siempre en la parte inferior
+                Spacer(modifier = Modifier.height(4.dp))
+
+                // Información del artista
                 Text(
                     text = artwork.artist,
                     color = AccentGold,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Normal,
-                    maxLines = 1, // Limitar a 1 línea para consistencia
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(top = 4.dp)
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
         }
