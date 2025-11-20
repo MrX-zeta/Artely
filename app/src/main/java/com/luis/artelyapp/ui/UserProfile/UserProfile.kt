@@ -129,6 +129,7 @@ fun UserProfileScreen(
                         UserProfileTab.GALLERY -> galleryArtworks
                         UserProfileTab.FOR_SALE -> forSaleArtworks
                     },
+                    selectedTab = selectedTab,
                     onNavigateToUpload = onNavigateToUpload
                 )
             }
@@ -423,6 +424,7 @@ private fun TabSection(
 @Composable
 private fun CollectionsSection(
     artworks: List<UserArtwork>,
+    selectedTab: UserProfileTab,
     onNavigateToUpload: () -> Unit = {}
 ) {
     Column(
@@ -501,7 +503,7 @@ private fun CollectionsSection(
                     verticalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        text = "🎨",
+                        text = if (selectedTab == UserProfileTab.FOR_SALE) "💰" else "🎨",
                         fontSize = 48.sp,
                         color = TextSecondary
                     )
@@ -509,7 +511,10 @@ private fun CollectionsSection(
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Text(
-                        text = "Aún no tienes colecciones",
+                        text = when (selectedTab) {
+                            UserProfileTab.FOR_SALE -> "No hay arte en venta"
+                            UserProfileTab.GALLERY -> "Aún no tienes obras en galería"
+                        },
                         color = TextSecondary,
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Medium,
@@ -519,7 +524,10 @@ private fun CollectionsSection(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
-                        text = "Comparte tu primera obra de arte",
+                        text = when (selectedTab) {
+                            UserProfileTab.FOR_SALE -> "Marca tus obras como 'en venta' para que aparezcan aquí"
+                            UserProfileTab.GALLERY -> "Comparte tu primera obra de arte"
+                        },
                         color = TextSecondary.copy(alpha = 0.7f),
                         fontSize = 14.sp,
                         textAlign = TextAlign.Center
@@ -564,7 +572,7 @@ private fun UserArtworkCard(artwork: UserArtwork) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(220.dp), // Aumentar altura para más texto
+            .height(240.dp), // Aumentar altura ligeramente para acomodar mejor el contenido
         colors = CardDefaults.cardColors(
             containerColor = CardBackground
         ),
@@ -605,48 +613,36 @@ private fun UserArtworkCard(artwork: UserArtwork) {
                 }
             }
 
-            // Card content - usando Column con peso flexible
+            // Card content - usando Column con distribución más controlada
             Column(
                 modifier = Modifier
                     .padding(12.dp)
                     .fillMaxWidth()
-                    .weight(1f), // Usar peso flexible para el contenido
-                verticalArrangement = Arrangement.SpaceBetween // Distribuir espacio entre elementos
+                    .fillMaxHeight(), // Usar toda la altura disponible
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
-                // Título con manejo inteligente de líneas
+                // Título con altura máxima controlada
                 Text(
                     text = artwork.title,
                     color = TextLight,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Normal,
-                    maxLines = if (artwork.title.contains("\n")) 3 else 2, // Más líneas si tiene enter
+                    maxLines = if (artwork.title.contains("\n")) 2 else 2, // Limitar a 2 líneas máximo
                     overflow = TextOverflow.Ellipsis,
-                    lineHeight = 16.sp // Reducir altura de línea para aprovechar espacio
+                    lineHeight = 16.sp,
+                    modifier = Modifier.weight(1f, fill = false) // Permitir que crezca pero no más del necesario
                 )
 
-                // Spacer que se adapta al contenido
-                Spacer(modifier = Modifier.height(4.dp))
-
-                // Información del artista o precio - siempre visible
-                if (artwork.isForSale && artwork.price != null) {
-                    Text(
-                        text = artwork.price,
-                        color = AccentGold,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Normal,
-                        maxLines = 1
-                    )
-                } else {
-                    Text(
-                        text = artwork.artist,
-                        color = AccentGold,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Normal,
-                        maxLines = 2, // Permitir 2 líneas para nombres largos
-                        overflow = TextOverflow.Ellipsis,
-                        lineHeight = 14.sp
-                    )
-                }
+                // Información del artista - siempre en la parte inferior
+                Text(
+                    text = artwork.artist,
+                    color = AccentGold,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Normal,
+                    maxLines = 1, // Limitar a 1 línea para consistencia
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
             }
         }
     }

@@ -18,32 +18,22 @@ class UserProfileViewModel : ViewModel() {
     val userProfile: StateFlow<UserProfileInfo> = _userProfile.asStateFlow()
 
     private val _userArtworks = MutableStateFlow<List<UserArtwork>>(
-        // Agregar algunas obras de ejemplo para probar
-        listOf(
-
-            UserArtwork(
-                id = 1001,
-                title = "Noche Estrellada\nSobre el Ródano",
-                artist = "Vincent van Gogh",
-                description = "Paisaje nocturno impresionista",
-                imageUri = null,
-                price = "$2,500",
-                isForSale = true
-            )
-        )
+        // Lista vacía para que el usuario comience sin obras
+        emptyList()
     )
     val userArtworks: StateFlow<List<UserArtwork>> = _userArtworks.asStateFlow()
 
     private var nextId = 2000 // Empezar desde 2000 para evitar conflictos
 
-    fun addArtwork(title: String, description: String, imageUri: Uri?) {
+    fun addArtwork(title: String, description: String, imageUri: Uri?, isForSale: Boolean = false) {
         val newArtwork = UserArtwork(
             id = nextId++,
             title = title,
             artist = "Aristote", // Por ahora el usuario actual
             description = description,
             imageUri = imageUri,
-            isForSale = false
+            isForSale = isForSale,
+            price = null // Siempre null ya que eliminamos el manejo de precios
         )
 
         _userArtworks.value = _userArtworks.value + newArtwork

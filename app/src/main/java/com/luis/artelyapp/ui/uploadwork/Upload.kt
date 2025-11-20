@@ -31,11 +31,12 @@ import coil.request.ImageRequest
 @Composable
 fun Upload(
     onBackClick: () -> Unit = {},
-    onPublishWork: (title: String, description: String, imageUri: Uri?) -> Unit = { _, _, _ -> }
+    onPublishWork: (title: String, description: String, imageUri: Uri?, isForSale: Boolean) -> Unit = { _, _, _, _ -> }
 ) {
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+    var isForSale by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
 
@@ -241,6 +242,53 @@ fun Upload(
                         )
                     }
 
+                    // Sale Status Section
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Text(
+                            text = "ESTADO DE VENTA",
+                            color = goldenColor,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Normal,
+                            letterSpacing = 0.5.sp
+                        )
+
+                        // Switch for sale status
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Column(
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text(
+                                    text = "¿Está en venta?",
+                                    color = Color.White,
+                                    fontSize = 16.sp,
+                                    fontWeight = FontWeight.Normal
+                                )
+                                Text(
+                                    text = if (isForSale) "Esta obra aparecerá en 'Arte en Venta'" else "Esta obra aparecerá en 'Galería'",
+                                    color = lightGray,
+                                    fontSize = 13.sp
+                                )
+                            }
+
+                            Switch(
+                                checked = isForSale,
+                                onCheckedChange = { isForSale = it },
+                                colors = SwitchDefaults.colors(
+                                    checkedThumbColor = goldenColor,
+                                    checkedTrackColor = goldenColor.copy(alpha = 0.3f),
+                                    uncheckedThumbColor = lightGray,
+                                    uncheckedTrackColor = mediumGray
+                                )
+                            )
+                        }
+                    }
+
                     Spacer(modifier = Modifier.height(40.dp))
 
                     // Action Buttons
@@ -271,7 +319,7 @@ fun Upload(
                         Button(
                             onClick = {
                                 if (title.isNotBlank() && description.isNotBlank() && selectedImageUri != null) {
-                                    onPublishWork(title, description, selectedImageUri)
+                                    onPublishWork(title, description, selectedImageUri, isForSale)
                                 }
                             },
                             modifier = Modifier
