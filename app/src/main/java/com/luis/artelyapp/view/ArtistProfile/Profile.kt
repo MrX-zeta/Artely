@@ -20,38 +20,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
+import com.luis.artelyapp.model.Artist
+import com.luis.artelyapp.model.ArtistStats
+import com.luis.artelyapp.model.Artwork
+import com.luis.artelyapp.model.ProfileTab
 
-// Clases de datos locales (ya que eliminaste el archivo view)
-data class Artist(
-    val id: Int,
-    val email: String,
-    val bio: String,
-    val location: String,
-    val role: String = "Artist"
-)
-
-data class ArtistStats(
-    val totalArtworks: Int,
-    val followers: Int,
-    val following: Int = 0,
-    val likes: Int = 0
-)
-
-data class Artwork(
-    val id: Int,
-    val title: String,
-    val artist: String,
-    val price: String? = null,
-    val imageUrl: String = "",
-    val isForSale: Boolean = false
-)
-
-enum class ProfileTab {
-    GALLERY,
-    FOR_SALE
-}
-
-// Colores de la paleta
 private val DarkBackground = Color(0xFF1A1A1A)
 private val SecondaryBackground = Color(0xFF2D2D2D)
 private val CardBackground = Color(0xFF2A2A2A)
@@ -69,44 +42,62 @@ fun ArtistProfileScreen(
     // Estado local para las pestañas
     var selectedTab by remember { mutableStateOf(ProfileTab.GALLERY) }
 
-    // Datos de muestra usando las clases locales, adaptados al artista
+    // Datos de muestra usando el modelo Artist correcto
     val sampleArtist = remember(artistName) {
         when (artistName) {
             "Vincent van Gogh" -> Artist(
-                id = 2,
-                email = "vincent@artely.com",
-                bio = "Pintor postimpresionista neerlandés que figura entre las figuras más famosas e influyentes de la historia del arte occidental.",
-                location = "Países Bajos"
+                id_User = 2,
+                UserName = "Vincent van Gogh",
+                Email = "vincent@artely.com",
+                Psswd = "",
+                Role = "Artist",
+                Bio = "Pintor postimpresionista neerlandés que figura entre las figuras más famosas e influyentes de la historia del arte occidental.",
+                Location = "Países Bajos"
             )
             "Leonardo da Vinci" -> Artist(
-                id = 3,
-                email = "leonardo@artely.com",
-                bio = "Polímata del Renacimiento italiano. Fue a la vez pintor, anatomista, arquitecto, paleontólogo, botánico, escritor, escultor, filósofo, ingeniero, inventor, músico, poeta y urbanista.",
-                location = "Italia"
+                id_User = 3,
+                UserName = "Leonardo da Vinci",
+                Email = "leonardo@artely.com",
+                Psswd = "",
+                Role = "Artist",
+                Bio = "Polímata del Renacimiento italiano. Fue a la vez pintor, anatomista, arquitecto, paleontólogo, botánico, escritor, escultor, filósofo, ingeniero, inventor, músico, poeta y urbanista.",
+                Location = "Italia"
             )
             "Miguel Ángel" -> Artist(
-                id = 4,
-                email = "michelangelo@artely.com",
-                bio = "Arquitecto, escultor y pintor italiano renacentista, considerado uno de los más grandes artistas de la historia.",
-                location = "Italia"
+                id_User = 4,
+                UserName = "Miguel Ángel",
+                Email = "michelangelo@artely.com",
+                Psswd = "",
+                Role = "Artist",
+                Bio = "Arquitecto, escultor y pintor italiano renacentista, considerado uno de los más grandes artistas de la historia.",
+                Location = "Italia"
             )
             "Claude Monet" -> Artist(
-                id = 5,
-                email = "claude@artely.com",
-                bio = "Pintor francés, uno de los creadores del impresionismo. El término impresionismo deriva del título de su obra Impresión, sol naciente.",
-                location = "Francia"
+                id_User = 5,
+                UserName = "Claude Monet",
+                Email = "claude@artely.com",
+                Psswd = "",
+                Role = "Artist",
+                Bio = "Pintor francés, uno de los creadores del impresionismo. El término impresionismo deriva del título de su obra Impresión, sol naciente.",
+                Location = "Francia"
             )
             "Wassily Kandinsky" -> Artist(
-                id = 6,
-                email = "wassily@artely.com",
-                bio = "Pintor ruso, precursor de la abstracción en pintura y teórico del arte. Se considera que con él comienza la abstracción lírica.",
-                location = "Rusia"
+                id_User = 6,
+                UserName = "Wassily Kandinsky",
+                Email = "wassily@artely.com",
+                Psswd = "",
+                Role = "Artist",
+                Bio = "Pintor ruso, precursor de la abstracción en pintura y teórico del arte. Se considera que con él comienza la abstracción lírica.",
+                Location = "Rusia"
             )
             else -> Artist(
-                id = 1,
-                email = "aristote@artely.com",
-                bio = "Artista visual especializado en retratos contemporáneos y arte figurativo",
-                location = "París, Francia"
+                id_User = 1,
+                UserName = "Aristote",
+                Email = "aristote@artely.com",
+                Psswd = "",
+                Role = "Artist",
+                Bio = "Artista visual especializado en retratos contemporáneos y arte figurativo",
+                Location = "París, Francia"
             )
         }
     }
@@ -330,7 +321,7 @@ private fun ArtistHeader(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = artist.email.take(1).uppercase(),
+                        text = artist.Email.take(1).uppercase(),
                         color = DarkBackground,
                         fontSize = 32.sp,
                         fontWeight = FontWeight.Bold
@@ -341,7 +332,7 @@ private fun ArtistHeader(
 
                 Column {
                     Text(
-                        text = artist.email.split("@")[0].replaceFirstChar { it.uppercase() },
+                        text = artist.UserName,
                         color = TextPrimary,
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Bold,
@@ -351,7 +342,7 @@ private fun ArtistHeader(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
-                        text = artist.bio,
+                        text = artist.Bio,
                         color = TextSecondary,
                         fontSize = 14.sp,
                         lineHeight = 19.6.sp
@@ -360,7 +351,7 @@ private fun ArtistHeader(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
-                        text = "📍 ${artist.location}",
+                        text = "📍 ${artist.Location}",
                         color = AccentGold,
                         fontSize = 13.sp
                     )

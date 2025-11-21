@@ -19,6 +19,7 @@
               <option value="1da46e18-dfae-42c7-9692-524e74ed2464" />
               <option value="a62c0882-b789-4930-beb7-ed18765e8d82" />
               <option value="50ba718b-8ac1-40d5-a7d3-5be728229b57" />
+              <option value="f58cc5de-ae8b-4aba-bdaf-31bb114be161" />
             </set>
           </value>
         </entry>
@@ -35,6 +36,12 @@
           <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/model/Chat.kt" />
           <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/viewmodel/ChatViewModel.kt" />
           <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/viewmodel/MessageViewModel.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/model/ArtistStats.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/model/ArtWork.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/model/ProfileTab.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/view/ArtistProfile/Profile.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/model/User.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/model/Artist.kt" />
         </set>
       </entry>
     </pendingWorkingSetItems>
