@@ -7,9 +7,16 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
+// Modelo auxiliar para la UI que combina Chat con información adicional
+data class ChatDisplay(
+    val chat: Chat,
+    val userName: String,
+    val messages: List<Message>
+)
+
 class ChatViewModel : ViewModel() {
-    private val _chats = MutableStateFlow<List<Chat>>(emptyList())
-    val chats: StateFlow<List<Chat>> = _chats.asStateFlow()
+    private val _chatsDisplay = MutableStateFlow<List<ChatDisplay>>(emptyList())
+    val chats: StateFlow<List<ChatDisplay>> = _chatsDisplay.asStateFlow()
 
     init {
         loadChats()
@@ -17,46 +24,59 @@ class ChatViewModel : ViewModel() {
 
     private fun loadChats() {
         // Datos de ejemplo - Reemplazar con datos reales de tu backend/base de datos
-        _chats.value = listOf(
-            Chat(
-                id_User = 101,
+        // En la implementación real, cargarías los mensajes desde MessageRepository
+        _chatsDisplay.value = listOf(
+            ChatDisplay(
+                chat = Chat(
+                    id_Chat = 1,
+                    id_Artist = 101,
+                    id_Customer = 1
+                ),
                 userName = "Pablo Picasso",
-                id_Chat = 1,
                 messages = listOf(
-                    Message(1, 101, 1, 1,"Hola, me interesa tu obra"),
-                    Message(1, 1, 101, 1,"Gracias por tu interés!")
+                    Message(1, 1, 101, 1, "Hola, me interesa tu obra"),
+                    Message(2, 1, 1, 101, "Gracias por tu interés!")
                 )
             ),
-            Chat(
-                id_User = 102,
+            ChatDisplay(
+                chat = Chat(
+                    id_Chat = 2,
+                    id_Artist = 102,
+                    id_Customer = 1
+                ),
                 userName = "Frida Kahlo",
-                id_Chat = 2,
                 messages = listOf(
-                    Message(2, 102, 1, 1,"¿Cuánto cuesta esta pieza?"),
-                    Message(2, 1, 102, 1,"Te envío los detalles")
+                    Message(3, 2, 102, 1, "¿Cuánto cuesta esta pieza?"),
+                    Message(4, 2, 1, 102, "Te envío los detalles")
                 )
             ),
-            Chat(
-                id_User = 103,
+            ChatDisplay(
+                chat = Chat(
+                    id_Chat = 3,
+                    id_Artist = 103,
+                    id_Customer = 1
+                ),
                 userName = "Leonardo da Vinci",
-                id_Chat = 3,
                 messages = listOf(
-                    Message(3, 103, 1, 1,"Excelente trabajo")
+                    Message(5, 3, 103, 1, "Excelente trabajo")
                 )
             ),
-            Chat(
-                id_User = 104,
+            ChatDisplay(
+                chat = Chat(
+                    id_Chat = 4,
+                    id_Artist = 104,
+                    id_Customer = 1
+                ),
                 userName = "Vincent van Gogh",
-                id_Chat = 4,
                 messages = listOf(
-                    Message(4, 104, 1, 1,"Me encanta tu estilo"),
-                    Message(4, 1, 104, 1,"¡Muchas gracias!")
+                    Message(6, 4, 104, 1, "Me encanta tu estilo"),
+                    Message(7, 4, 1, 104, "¡Muchas gracias!")
                 )
             )
         )
     }
 
-    fun getChatById(chatId: Int): Chat? {
-        return _chats.value.find { it.id_Chat == chatId }
+    fun getChatById(chatId: Int): ChatDisplay? {
+        return _chatsDisplay.value.find { it.chat.id_Chat == chatId }
     }
 }

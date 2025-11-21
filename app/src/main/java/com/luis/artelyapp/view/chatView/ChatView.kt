@@ -32,8 +32,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.luis.artelyapp.model.Chat
 import com.luis.artelyapp.viewmodel.ChatViewModel
+import com.luis.artelyapp.viewmodel.ChatDisplay
 
 @Composable
 fun ChatView(
@@ -78,7 +78,7 @@ fun ChatView(
                 items(chats) { chat ->
                     ChatItem(
                         chat = chat,
-                        onChatClick = { onNavigateToMessage(chat.id_Chat) }
+                        onChatClick = { onNavigateToMessage(chat.chat.id_Chat) }
                     )
                     HorizontalDivider(color = Color(0xFF2A2A2A), thickness = 1.dp)
                 }
@@ -111,7 +111,7 @@ fun ChatListHeader() {
 
 @Composable
 fun ChatItem(
-    chat: Chat,
+    chat: ChatDisplay,
     onChatClick: () -> Unit
 ) {
     val lastMessage = chat.messages.lastOrNull()

@@ -20,6 +20,15 @@
               <option value="a62c0882-b789-4930-beb7-ed18765e8d82" />
               <option value="50ba718b-8ac1-40d5-a7d3-5be728229b57" />
               <option value="f58cc5de-ae8b-4aba-bdaf-31bb114be161" />
+              <option value="4dfb1f2c-7df5-461d-aa47-54ebc30ccb1d" />
+              <option value="b3eee9c6-4e7f-4f58-8c23-b5f59da960e9" />
+              <option value="c91656f2-fd41-4b8c-b85b-9d44ac3d1027" />
+              <option value="0789f42e-524e-400d-9646-db68577a97af" />
+              <option value="c301064d-7fa8-4099-993a-38568b71ade7" />
+              <option value="2a9ea2b5-5a07-4d2c-8bfa-4925c40d5ff2" />
+              <option value="a850b474-e080-415d-ad97-6258b5ca6baf" />
+              <option value="1b150dc7-c07b-4059-a04e-7a5892222872" />
+              <option value="536fa0db-0874-4bb5-8ac4-77eb98021da1" />
             </set>
           </value>
         </entry>
@@ -42,6 +51,15 @@
           <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/view/ArtistProfile/Profile.kt" />
           <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/model/User.kt" />
           <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/model/Artist.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/viewmodel/ArtistViewModel.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/viewmodel/CustomerViewModel.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/viewmodel/NotificationViewModel.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/repository/ArtworkRepository.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/repository/MessageRepository.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/repository/NotificationRepository.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/repository/ChatRepository.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/model/Customer.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/model/Notification.kt" />
         </set>
       </entry>
     </pendingWorkingSetItems>

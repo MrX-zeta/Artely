@@ -146,37 +146,172 @@ fun ArtistProfileScreen(
     val sampleArtworksGallery = remember(artistName) {
         when (artistName) {
             "Vincent van Gogh" -> listOf(
-                Artwork(id = 1, title = "Noche Estrellada", artist = artistName, isForSale = false),
-                Artwork(id = 2, title = "Los Girasoles", artist = artistName, isForSale = false),
-                Artwork(id = 3, title = "Autorretrato", artist = artistName, isForSale = false)
+                Artwork(
+                    id_ArtWork = 1,
+                    id_Artist = 2,
+                    Title = "Noche Estrellada",
+                    Description = "Una de las pinturas más famosas del mundo",
+                    Price = 0.0,
+                    Technique = "Óleo sobre lienzo",
+                    Status = "Exhibition",
+                    ImageUrl = ""
+                ),
+                Artwork(
+                    id_ArtWork = 2,
+                    id_Artist = 2,
+                    Title = "Los Girasoles",
+                    Description = "Serie de pinturas al óleo",
+                    Price = 0.0,
+                    Technique = "Óleo sobre lienzo",
+                    Status = "Exhibition",
+                    ImageUrl = ""
+                ),
+                Artwork(
+                    id_ArtWork = 3,
+                    id_Artist = 2,
+                    Title = "Autorretrato",
+                    Description = "Autorretrato del artista",
+                    Price = 0.0,
+                    Technique = "Óleo sobre lienzo",
+                    Status = "Exhibition",
+                    ImageUrl = ""
+                )
             )
             "Leonardo da Vinci" -> listOf(
-                Artwork(id = 1, title = "La Gioconda", artist = artistName, isForSale = false),
-                Artwork(id = 2, title = "La Última Cena", artist = artistName, isForSale = false)
+                Artwork(
+                    id_ArtWork = 1,
+                    id_Artist = 3,
+                    Title = "La Gioconda",
+                    Description = "Retrato de Lisa Gherardini",
+                    Price = 0.0,
+                    Technique = "Óleo sobre tabla de álamo",
+                    Status = "Exhibition",
+                    ImageUrl = ""
+                ),
+                Artwork(
+                    id_ArtWork = 2,
+                    id_Artist = 3,
+                    Title = "La Última Cena",
+                    Description = "Pintura mural original",
+                    Price = 0.0,
+                    Technique = "Temple y óleo",
+                    Status = "Exhibition",
+                    ImageUrl = ""
+                )
             )
             "Miguel Ángel" -> listOf(
-                Artwork(id = 1, title = "David", artist = artistName, isForSale = false),
-                Artwork(id = 2, title = "La Piedad", artist = artistName, isForSale = false)
+                Artwork(
+                    id_ArtWork = 1,
+                    id_Artist = 4,
+                    Title = "David",
+                    Description = "Escultura de mármol blanco",
+                    Price = 0.0,
+                    Technique = "Escultura en mármol",
+                    Status = "Exhibition",
+                    ImageUrl = ""
+                ),
+                Artwork(
+                    id_ArtWork = 2,
+                    id_Artist = 4,
+                    Title = "La Piedad",
+                    Description = "Escultura renacentista",
+                    Price = 0.0,
+                    Technique = "Escultura en mármol",
+                    Status = "Exhibition",
+                    ImageUrl = ""
+                )
             )
             "Claude Monet" -> listOf(
-                Artwork(id = 1, title = "Impresión, sol naciente", artist = artistName, isForSale = false),
-                Artwork(id = 2, title = "Nenúfares", artist = artistName, isForSale = false)
+                Artwork(
+                    id_ArtWork = 1,
+                    id_Artist = 5,
+                    Title = "Impresión, sol naciente",
+                    Description = "Obra que dio nombre al impresionismo",
+                    Price = 0.0,
+                    Technique = "Óleo sobre lienzo",
+                    Status = "Exhibition",
+                    ImageUrl = ""
+                ),
+                Artwork(
+                    id_ArtWork = 2,
+                    id_Artist = 5,
+                    Title = "Nenúfares",
+                    Description = "Serie de aproximadamente 250 pinturas",
+                    Price = 0.0,
+                    Technique = "Óleo sobre lienzo",
+                    Status = "Exhibition",
+                    ImageUrl = ""
+                )
             )
             "Wassily Kandinsky" -> listOf(
-                Artwork(id = 1, title = "Composición VIII", artist = artistName, isForSale = false),
-                Artwork(id = 2, title = "Improvisación 28", artist = artistName, isForSale = false)
+                Artwork(
+                    id_ArtWork = 1,
+                    id_Artist = 6,
+                    Title = "Composición VIII",
+                    Description = "Obra abstracta geométrica",
+                    Price = 0.0,
+                    Technique = "Óleo sobre lienzo",
+                    Status = "Exhibition",
+                    ImageUrl = ""
+                ),
+                Artwork(
+                    id_ArtWork = 2,
+                    id_Artist = 6,
+                    Title = "Improvisación 28",
+                    Description = "Abstracción lírica",
+                    Price = 0.0,
+                    Technique = "Óleo sobre lienzo",
+                    Status = "Exhibition",
+                    ImageUrl = ""
+                )
             )
             else -> listOf(
-                Artwork(id = 1, title = "La Gioconda", artist = artistName, isForSale = false),
-                Artwork(id = 2, title = "Retrato Contemporáneo", artist = artistName, isForSale = false)
+                Artwork(
+                    id_ArtWork = 1,
+                    id_Artist = 1,
+                    Title = "La Gioconda",
+                    Description = "Retrato clásico",
+                    Price = 0.0,
+                    Technique = "Óleo sobre lienzo",
+                    Status = "Exhibition",
+                    ImageUrl = ""
+                ),
+                Artwork(
+                    id_ArtWork = 2,
+                    id_Artist = 1,
+                    Title = "Retrato Contemporáneo",
+                    Description = "Obra de arte figurativo",
+                    Price = 0.0,
+                    Technique = "Técnica mixta",
+                    Status = "Available",
+                    ImageUrl = ""
+                )
             )
         }
     }
 
     val sampleArtworksForSale = remember(artistName) {
         listOf(
-            Artwork(id = 3, title = "Obra Especial", artist = artistName, price = "$3,500", isForSale = true),
-            Artwork(id = 4, title = "Edición Limitada", artist = artistName, price = "$1,200", isForSale = true)
+            Artwork(
+                id_ArtWork = 3,
+                id_Artist = 1,
+                Title = "Obra Especial",
+                Description = "Una pieza única para coleccionistas",
+                Price = 3500.0,
+                Technique = "Acrílico sobre lienzo",
+                Status = "Available",
+                ImageUrl = ""
+            ),
+            Artwork(
+                id_ArtWork = 4,
+                id_Artist = 1,
+                Title = "Edición Limitada",
+                Description = "Serie limitada de 10 piezas",
+                Price = 1200.0,
+                Technique = "Serigrafía",
+                Status = "Available",
+                ImageUrl = ""
+            )
         )
     }
 
@@ -602,7 +737,7 @@ private fun ArtPieceCard(artwork: Artwork) {
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = artwork.title,
+                    text = artwork.Title,
                     color = Color(0xFF777777),
                     fontSize = 12.sp,
                     fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
@@ -615,7 +750,7 @@ private fun ArtPieceCard(artwork: Artwork) {
                 modifier = Modifier.padding(12.dp)
             ) {
                 Text(
-                    text = artwork.title,
+                    text = artwork.Title,
                     color = TextLight,
                     fontSize = 14.sp,
                     maxLines = 2,
@@ -625,7 +760,11 @@ private fun ArtPieceCard(artwork: Artwork) {
                 Spacer(modifier = Modifier.height(6.dp))
 
                 Text(
-                    text = if (artwork.isForSale && artwork.price != null) artwork.price else artwork.artist,
+                    text = if (artwork.Status == "Available" && artwork.Price > 0) {
+                        "$${String.format("%.2f", artwork.Price)}"
+                    } else {
+                        artwork.Description
+                    },
                     color = AccentGold,
                     fontSize = 12.sp,
                     maxLines = 2,
