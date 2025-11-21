@@ -29,6 +29,7 @@
               <option value="a850b474-e080-415d-ad97-6258b5ca6baf" />
               <option value="1b150dc7-c07b-4059-a04e-7a5892222872" />
               <option value="536fa0db-0874-4bb5-8ac4-77eb98021da1" />
+              <option value="ede0d489-3e5a-4a48-92b9-a102a01436b4" />
             </set>
           </value>
         </entry>
@@ -60,6 +61,9 @@
           <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/repository/ChatRepository.kt" />
           <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/model/Customer.kt" />
           <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/model/Notification.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/ui/theme/Color.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/ui/theme/Theme.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/ui/theme/Type.kt" />
         </set>
       </entry>
     </pendingWorkingSetItems>

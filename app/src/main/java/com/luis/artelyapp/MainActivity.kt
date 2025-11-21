@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
@@ -25,7 +24,7 @@ import com.luis.artelyapp.view.auth.LoginScreen
 import com.luis.artelyapp.view.auth.RegisterScreen
 import com.luis.artelyapp.navigation.NavManager
 import com.luis.artelyapp.view.onboarding.WelcomeScreen
-// TODO: Crear ArtelyAppTheme en ui/theme/Theme.kt
+import com.luis.artelyapp.ui.theme.ArtelyAppTheme
 import androidx.compose.ui.platform.LocalContext
 
 class MainActivity : ComponentActivity() {
@@ -33,12 +32,11 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            // TODO: Descomentar cuando ArtelyAppTheme esté creado
-            // ArtelyAppTheme {
-            Surface(modifier = Modifier.fillMaxSize()) {
-                PhoneContainer { RootContent() }
+            ArtelyAppTheme {
+                Surface(modifier = Modifier.fillMaxSize()) {
+                    PhoneContainer { RootContent() }
+                }
             }
-            // }
         }
     }
 }
