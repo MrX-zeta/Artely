@@ -3,51 +3,38 @@
   <component name="AgentMigrationStateService">
     <option name="pendingSessionIds">
       <option value="c9b6dc88-ae31-4187-b988-00239f0edb6d" />
-      <option value="e533075e-fb18-4af0-93f7-e5a4e40566f3" />
     </option>
     <option name="pendingTurns">
       <map>
         <entry key="c9b6dc88-ae31-4187-b988-00239f0edb6d">
           <value>
             <set>
-              <option value="51774504-5576-4117-9515-8cfa2da97b03" />
-              <option value="89b269e3-e86b-4320-87e6-c647eeabc754" />
-              <option value="ceaf4a50-7e19-48b7-a47e-62eb64638810" />
-<<<<<<< HEAD
-              <option value="5fe54c6e-1e0e-4b69-8fff-62ed99e2a83f" />
-              <option value="0c5e58e0-fe1e-4618-8796-48dd6841bf05" />
-=======
-              <option value="dbcc3708-af98-456d-b8f3-d3d5949f6b8b" />
-            </set>
-          </value>
-        </entry>
-        <entry key="e533075e-fb18-4af0-93f7-e5a4e40566f3">
-          <value>
-            <set>
-              <option value="91e77dd7-5e96-4ff2-9dda-890b34165733" />
-              <option value="ca30381a-2edf-44d8-a824-837c7dba301c" />
-              <option value="7209852e-e977-46e0-88a4-3c6a7f93aab2" />
-              <option value="9774fe77-0cee-4e86-bbbf-9c4b78d2bbc2" />
-              <option value="99523915-c849-4e2e-a54e-16ec4470e8d2" />
-              <option value="9f7c9ae3-7462-44af-a5d9-6af6c167fd89" />
->>>>>>> origin/Status
+              <option value="2dd46d32-a5b3-41ad-a9d2-1004e1b70b96" />
+              <option value="d2b7e148-aa0c-4763-9852-432e72415328" />
+              <option value="2cafe977-cc89-426b-a528-574c412488f0" />
+              <option value="917c48e7-ef70-4bc5-b1e5-e16a704ab3c3" />
+              <option value="147e4628-5b00-4776-8603-3a73814a1da5" />
+              <option value="771e7b04-15a2-4827-a112-1d8ebc4399ad" />
+              <option value="f7ecb796-97eb-4cc6-a2fa-edf1cccf45df" />
+              <option value="1da46e18-dfae-42c7-9692-524e74ed2464" />
+              <option value="a62c0882-b789-4930-beb7-ed18765e8d82" />
+              <option value="50ba718b-8ac1-40d5-a7d3-5be728229b57" />
             </set>
           </value>
         </entry>
       </map>
     </option>
     <pendingWorkingSetItems>
-      <entry key="c9b6dc88-ae31-4187-b988-00239f0edb6d" />
-      <entry key="e533075e-fb18-4af0-93f7-e5a4e40566f3">
+      <entry key="c9b6dc88-ae31-4187-b988-00239f0edb6d">
         <set>
-          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/ui/uploadwork/Upload.kt" />
-<<<<<<< HEAD
-          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/ui/UserProfile/EditProfileScreen.kt" />
-=======
->>>>>>> origin/Status
-          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/ui/UserProfile/UserProfileViewModel.kt" />
           <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/navigation/NavManager.kt" />
-          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/ui/UserProfile/UserProfile.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/MainActivity.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/view/chatView/ChatView.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/view/messageView/MessageView.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/model/Message.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/model/Chat.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/viewmodel/ChatViewModel.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/viewmodel/MessageViewModel.kt" />
         </set>
       </entry>
     </pendingWorkingSetItems>

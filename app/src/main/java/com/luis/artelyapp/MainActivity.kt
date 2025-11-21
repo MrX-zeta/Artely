@@ -21,11 +21,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.luis.artelyapp.ui.auth.LoginScreen
-import com.luis.artelyapp.ui.auth.RegisterScreen
-import com.luis.artelyapp.ui.navigation.NavManager
-import com.luis.artelyapp.ui.onboarding.WelcomeScreen
-import com.luis.artelyapp.ui.theme.ArtelyAppTheme
+import com.luis.artelyapp.view.auth.LoginScreen
+import com.luis.artelyapp.view.auth.RegisterScreen
+import com.luis.artelyapp.navigation.NavManager
+import com.luis.artelyapp.view.onboarding.WelcomeScreen
+// TODO: Crear ArtelyAppTheme en ui/theme/Theme.kt
 import androidx.compose.ui.platform.LocalContext
 
 class MainActivity : ComponentActivity() {
@@ -33,11 +33,12 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            ArtelyAppTheme {
-                Surface(modifier = Modifier.fillMaxSize()) {
-                    PhoneContainer { RootContent() }
-                }
+            // TODO: Descomentar cuando ArtelyAppTheme esté creado
+            // ArtelyAppTheme {
+            Surface(modifier = Modifier.fillMaxSize()) {
+                PhoneContainer { RootContent() }
             }
+            // }
         }
     }
 }
@@ -103,7 +104,4 @@ fun PhoneContainer(content: @Composable () -> Unit) {
     }
 }
 
-@Composable
-fun HelloWorld(){
-    Text("El pepe")
-}
+

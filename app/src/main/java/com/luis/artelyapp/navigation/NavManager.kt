@@ -1,4 +1,4 @@
-package com.luis.artelyapp.ui.navigation
+package com.luis.artelyapp.navigation
 
 import android.net.Uri
 import androidx.compose.runtime.Composable
@@ -8,16 +8,16 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.luis.artelyapp.ui.main.GalleryScreen
-import com.luis.artelyapp.ui.view.ChatView
-import com.luis.artelyapp.ui.view.MessageView
-import com.luis.artelyapp.ui.ArtistProfile.ArtistProfileScreen
-import com.luis.artelyapp.ui.UserProfile.UserProfileScreen
-import com.luis.artelyapp.ui.UserProfile.UserProfileViewModel
-import com.luis.artelyapp.ui.UserProfile.EditProfileScreen
-import com.luis.artelyapp.ui.uploadwork.Upload
-import com.luis.artelyapp.ui.EditArtwork.EditArtworkScreen
-import com.luis.artelyapp.ui.CreatePost.CreatePostScreen
+import com.luis.artelyapp.view.main.GalleryScreen
+import com.luis.artelyapp.view.chatView.ChatView
+import com.luis.artelyapp.view.messageView.MessageView
+import com.luis.artelyapp.view.ArtistProfile.ArtistProfileScreen
+import com.luis.artelyapp.view.UserProfile.UserProfileScreen
+import com.luis.artelyapp.view.UserProfile.UserProfileViewModel
+import com.luis.artelyapp.view.UserProfile.EditProfileScreen
+import com.luis.artelyapp.view.uploadwork.Upload
+import com.luis.artelyapp.view.EditArtwork.EditArtworkScreen
+import com.luis.artelyapp.view.CreatePost.CreatePostScreen
 
 sealed class Screen(val route: String) {
     object Gallery : Screen("gallery")
@@ -65,9 +65,15 @@ fun NavManager() {
                 onNavigateToMessage = { chatId ->
                     navController.navigate(Screen.Message.createRoute(chatId))
                 },
-                onNavigateToGallery = { navController.navigate(Screen.Gallery.route) },
-                onNavigateToCreate = { navController.navigate(Screen.CreatePost.route) },
-                onNavigateToProfile = { navController.navigate(Screen.UserProfile.route) }
+                onNavigateToGallery = {
+                    navController.navigate(Screen.Gallery.route)
+                },
+                onNavigateToCreate = {
+                    navController.navigate(Screen.CreatePost.route)
+                },
+                onNavigateToProfile = {
+                    navController.navigate(Screen.UserProfile.route)
+                }
             )
         }
 
