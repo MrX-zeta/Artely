@@ -35,13 +35,15 @@ fun EditArtworkScreen(
     currentDescription: String,
     currentImageUri: Uri?,
     currentIsForSale: Boolean,
+    currentPrice: String? = null,
     onBackClick: () -> Unit = {},
-    onSaveChanges: (artworkId: Int, title: String, description: String, imageUri: Uri?, isForSale: Boolean) -> Unit = { _, _, _, _, _ -> }
+    onSaveChanges: (artworkId: Int, title: String, description: String, imageUri: Uri?, isForSale: Boolean, price: String?) -> Unit = { _, _, _, _, _, _ -> }
 ) {
     var title by remember { mutableStateOf(currentTitle) }
     var description by remember { mutableStateOf(currentDescription) }
     var selectedImageUri by remember { mutableStateOf<Uri?>(currentImageUri) }
     var isForSale by remember { mutableStateOf(currentIsForSale) }
+    var price by remember { mutableStateOf(currentPrice ?: "") }
 
     val context = LocalContext.current
 
@@ -283,7 +285,10 @@ fun EditArtworkScreen(
 
                             Switch(
                                 checked = isForSale,
-                                onCheckedChange = { isForSale = it },
+                                onCheckedChange = {
+                                    isForSale = it
+                                    if (!it) price = ""
+                                },
                                 colors = SwitchDefaults.colors(
                                     checkedThumbColor = goldenColor,
                                     checkedTrackColor = goldenColor.copy(alpha = 0.3f),
@@ -291,6 +296,57 @@ fun EditArtworkScreen(
                                     uncheckedTrackColor = mediumGray
                                 )
                             )
+                        }
+
+                        // Price Input (solo visible cuando isForSale es true)
+                        if (isForSale) {
+                            Column(
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Text(
+                                    text = "PRECIO",
+                                    color = goldenColor,
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Normal,
+                                    letterSpacing = 0.5.sp
+                                )
+
+                                OutlinedTextField(
+                                    value = price,
+                                    onValueChange = { newPrice ->
+                                        // Solo permitir números y punto decimal
+                                        if (newPrice.isEmpty() || newPrice.matches(Regex("^\\d*\\.?\\d*$"))) {
+                                            price = newPrice
+                                        }
+                                    },
+                                    placeholder = {
+                                        Text(
+                                            text = "Ej: 150.00",
+                                            color = lightGray,
+                                            fontSize = 15.sp
+                                        )
+                                    },
+                                    leadingIcon = {
+                                        Text(
+                                            text = "$",
+                                            color = goldenColor,
+                                            fontSize = 16.sp,
+                                            modifier = Modifier.padding(start = 12.dp)
+                                        )
+                                    },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = OutlinedTextFieldDefaults.colors(
+                                        focusedBorderColor = mediumGray,
+                                        unfocusedBorderColor = mediumGray,
+                                        focusedContainerColor = darkGray,
+                                        unfocusedContainerColor = darkGray,
+                                        focusedTextColor = Color.White,
+                                        unfocusedTextColor = Color.White
+                                    ),
+                                    shape = RoundedCornerShape(6.dp),
+                                    singleLine = true
+                                )
+                            }
                         }
                     }
 
@@ -323,8 +379,10 @@ fun EditArtworkScreen(
                         // Save Button (Yellow/Golden)
                         Button(
                             onClick = {
-                                if (title.isNotBlank() && description.isNotBlank() && selectedImageUri != null) {
-                                    onSaveChanges(artworkId, title, description, selectedImageUri, isForSale)
+                                val priceToSend = if (isForSale && price.isNotBlank()) price else null
+                                val isValidForSale = !isForSale || price.isNotBlank()
+                                if (title.isNotBlank() && description.isNotBlank() && selectedImageUri != null && isValidForSale) {
+                                    onSaveChanges(artworkId, title, description, selectedImageUri, isForSale, priceToSend)
                                 }
                             },
                             modifier = Modifier
@@ -334,14 +392,16 @@ fun EditArtworkScreen(
                                 containerColor = goldenColor
                             ),
                             shape = RoundedCornerShape(6.dp),
-                            enabled = title.isNotBlank() && description.isNotBlank() && selectedImageUri != null
+                            enabled = title.isNotBlank() && description.isNotBlank() && selectedImageUri != null &&
+                                      (!isForSale || price.isNotBlank())
                         ) {
                             Text(
                                 text = "Guardar cambios",
                                 color = darkGray,
-                                fontSize = 16.sp,
+                                fontSize = 12.sp,
                                 fontWeight = FontWeight.Bold,
-                                textAlign = TextAlign.Center
+                                maxLines = 1,
+                                softWrap = false
                             )
                         }
                     }

@@ -31,12 +31,13 @@ import coil.request.ImageRequest
 @Composable
 fun Upload(
     onBackClick: () -> Unit = {},
-    onPublishWork: (title: String, description: String, imageUri: Uri?, isForSale: Boolean) -> Unit = { _, _, _, _ -> }
+    onPublishWork: (title: String, description: String, imageUri: Uri?, isForSale: Boolean, price: String?) -> Unit = { _, _, _, _, _ -> }
 ) {
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     var isForSale by remember { mutableStateOf(false) }
+    var price by remember { mutableStateOf("") }
 
     val context = LocalContext.current
 
@@ -278,7 +279,10 @@ fun Upload(
 
                             Switch(
                                 checked = isForSale,
-                                onCheckedChange = { isForSale = it },
+                                onCheckedChange = {
+                                    isForSale = it
+                                    if (!it) price = ""
+                                },
                                 colors = SwitchDefaults.colors(
                                     checkedThumbColor = goldenColor,
                                     checkedTrackColor = goldenColor.copy(alpha = 0.3f),
@@ -286,6 +290,57 @@ fun Upload(
                                     uncheckedTrackColor = mediumGray
                                 )
                             )
+                        }
+
+                        // Price Input (solo visible cuando isForSale es true)
+                        if (isForSale) {
+                            Column(
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Text(
+                                    text = "PRECIO",
+                                    color = goldenColor,
+                                    fontSize = 13.sp,
+                                    fontWeight = FontWeight.Normal,
+                                    letterSpacing = 0.5.sp
+                                )
+
+                                OutlinedTextField(
+                                    value = price,
+                                    onValueChange = { newPrice ->
+                                        // Solo permitir números y punto decimal
+                                        if (newPrice.isEmpty() || newPrice.matches(Regex("^\\d*\\.?\\d*$"))) {
+                                            price = newPrice
+                                        }
+                                    },
+                                    placeholder = {
+                                        Text(
+                                            text = "Ej: 150.00",
+                                            color = lightGray,
+                                            fontSize = 15.sp
+                                        )
+                                    },
+                                    leadingIcon = {
+                                        Text(
+                                            text = "$",
+                                            color = goldenColor,
+                                            fontSize = 16.sp,
+                                            modifier = Modifier.padding(start = 12.dp)
+                                        )
+                                    },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    colors = OutlinedTextFieldDefaults.colors(
+                                        focusedBorderColor = mediumGray,
+                                        unfocusedBorderColor = mediumGray,
+                                        focusedContainerColor = darkGray,
+                                        unfocusedContainerColor = darkGray,
+                                        focusedTextColor = Color.White,
+                                        unfocusedTextColor = Color.White
+                                    ),
+                                    shape = RoundedCornerShape(6.dp),
+                                    singleLine = true
+                                )
+                            }
                         }
                     }
 
@@ -318,8 +373,10 @@ fun Upload(
                         // Publish Button (Yellow/Golden)
                         Button(
                             onClick = {
-                                if (title.isNotBlank() && description.isNotBlank() && selectedImageUri != null) {
-                                    onPublishWork(title, description, selectedImageUri, isForSale)
+                                val priceToSend = if (isForSale && price.isNotBlank()) price else null
+                                if (title.isNotBlank() && description.isNotBlank() && selectedImageUri != null &&
+                                    (!isForSale || (isForSale && price.isNotBlank()))) {
+                                    onPublishWork(title, description, selectedImageUri, isForSale, priceToSend)
                                 }
                             },
                             modifier = Modifier
@@ -329,7 +386,8 @@ fun Upload(
                                 containerColor = goldenColor
                             ),
                             shape = RoundedCornerShape(6.dp),
-                            enabled = title.isNotBlank() && description.isNotBlank() && selectedImageUri != null
+                            enabled = title.isNotBlank() && description.isNotBlank() && selectedImageUri != null &&
+                                    (!isForSale || (isForSale && price.isNotBlank()))
                         ) {
                             Text(
                                 text = "Publicar obra",

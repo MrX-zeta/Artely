@@ -25,7 +25,7 @@ class UserProfileViewModel : ViewModel() {
 
     private var nextId = 2000 // Empezar desde 2000 para evitar conflictos
 
-    fun addArtwork(title: String, description: String, imageUri: Uri?, isForSale: Boolean = false) {
+    fun addArtwork(title: String, description: String, imageUri: Uri?, isForSale: Boolean = false, price: String? = null) {
         val newArtwork = UserArtwork(
             id = nextId++,
             title = title,
@@ -33,7 +33,7 @@ class UserProfileViewModel : ViewModel() {
             description = description,
             imageUri = imageUri,
             isForSale = isForSale,
-            price = null // Siempre null ya que eliminamos el manejo de precios
+            price = if (isForSale) price else null
         )
 
         _userArtworks.value = _userArtworks.value + newArtwork
@@ -53,14 +53,15 @@ class UserProfileViewModel : ViewModel() {
         }
     }
 
-    fun updateArtwork(artworkId: Int, title: String, description: String, imageUri: Uri?, isForSale: Boolean) {
+    fun updateArtwork(artworkId: Int, title: String, description: String, imageUri: Uri?, isForSale: Boolean, price: String? = null) {
         _userArtworks.value = _userArtworks.value.map { artwork ->
             if (artwork.id == artworkId) {
                 artwork.copy(
                     title = title,
                     description = description,
                     imageUri = imageUri,
-                    isForSale = isForSale
+                    isForSale = isForSale,
+                    price = if (isForSale) price else null
                 )
             } else {
                 artwork

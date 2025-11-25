@@ -131,9 +131,9 @@ fun NavManager() {
         composable(Screen.Upload.route) {
             Upload(
                 onBackClick = { navController.popBackStack() },
-                onPublishWork = { title, description, imageUri, isForSale ->
+                onPublishWork = { title, description, imageUri, isForSale, price ->
                     // Agregar la obra al ViewModel
-                    userProfileViewModel.addArtwork(title, description, imageUri, isForSale)
+                    userProfileViewModel.addArtwork(title, description, imageUri, isForSale, price)
                     // Regresar a UserProfile
                     navController.popBackStack()
                 }
@@ -156,9 +156,10 @@ fun NavManager() {
                     currentDescription = artwork.description,
                     currentImageUri = artwork.imageUri,
                     currentIsForSale = artwork.isForSale,
+                    currentPrice = artwork.price,
                     onBackClick = { navController.popBackStack() },
-                    onSaveChanges = { id, title, description, imageUri, isForSale ->
-                        userProfileViewModel.updateArtwork(id, title, description, imageUri, isForSale)
+                    onSaveChanges = { id: Int, title: String, description: String, imageUri: Uri?, isForSale: Boolean, price: String? ->
+                        userProfileViewModel.updateArtwork(id, title, description, imageUri, isForSale, price)
                         navController.popBackStack()
                     }
                 )
