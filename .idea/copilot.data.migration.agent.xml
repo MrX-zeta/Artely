@@ -1,23 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="AgentMigrationStateService">
-    <option name="migrationStatus" value="IN_PROGRESS" />
     <option name="pendingSessionIds">
-      <option value="2ba525da-fead-4ef4-8e59-ab31943a217e" />
-      <option value="33929349-aa09-4709-8c67-f66633f1abc2" />
       <option value="c9b6dc88-ae31-4187-b988-00239f0edb6d" />
       <option value="e533075e-fb18-4af0-93f7-e5a4e40566f3" />
     </option>
     <option name="pendingTurns">
       <map>
-        <entry key="33929349-aa09-4709-8c67-f66633f1abc2">
-          <value>
-            <set>
-              <option value="af718f65-3db4-413e-b68d-2d7ae8413417" />
-              <option value="db37c63d-839d-4202-a4cd-dff9771a78e1" />
-            </set>
-          </value>
-        </entry>
         <entry key="c9b6dc88-ae31-4187-b988-00239f0edb6d">
           <value>
             <set>
@@ -31,13 +20,12 @@
         <entry key="e533075e-fb18-4af0-93f7-e5a4e40566f3">
           <value>
             <set>
-              <option value="7209852e-e977-46e0-88a4-3c6a7f93aab2" />
               <option value="91e77dd7-5e96-4ff2-9dda-890b34165733" />
-              <option value="922ea54f-1359-4f96-8591-515e6cbeec67" />
+              <option value="ca30381a-2edf-44d8-a824-837c7dba301c" />
+              <option value="7209852e-e977-46e0-88a4-3c6a7f93aab2" />
               <option value="9774fe77-0cee-4e86-bbbf-9c4b78d2bbc2" />
               <option value="99523915-c849-4e2e-a54e-16ec4470e8d2" />
               <option value="9f7c9ae3-7462-44af-a5d9-6af6c167fd89" />
-              <option value="ca30381a-2edf-44d8-a824-837c7dba301c" />
             </set>
           </value>
         </entry>
@@ -45,7 +33,14 @@
     </option>
     <pendingWorkingSetItems>
       <entry key="c9b6dc88-ae31-4187-b988-00239f0edb6d" />
-      <entry key="e533075e-fb18-4af0-93f7-e5a4e40566f3" />
+      <entry key="e533075e-fb18-4af0-93f7-e5a4e40566f3">
+        <set>
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/ui/uploadwork/Upload.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/ui/UserProfile/UserProfileViewModel.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/navigation/NavManager.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/ui/UserProfile/UserProfile.kt" />
+        </set>
+      </entry>
     </pendingWorkingSetItems>
   </component>
 </project>

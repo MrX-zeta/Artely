@@ -1,4 +1,4 @@
-package com.luis.artelyapp.ui.navigation
+package com.luis.artelyapp.navigation
 
 import android.net.Uri
 import androidx.compose.runtime.Composable
@@ -8,14 +8,16 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.luis.artelyapp.ui.main.GalleryScreen
-import com.luis.artelyapp.ui.view.ChatView
-import com.luis.artelyapp.ui.view.MessageView
-import com.luis.artelyapp.ui.ArtistProfile.ArtistProfileScreen
-import com.luis.artelyapp.ui.UserProfile.UserProfileScreen
-import com.luis.artelyapp.ui.UserProfile.UserProfileViewModel
-import com.luis.artelyapp.ui.uploadwork.Upload
-import com.luis.artelyapp.ui.CreatePost.CreatePostScreen
+import com.luis.artelyapp.view.main.GalleryScreen
+import com.luis.artelyapp.view.chatView.ChatView
+import com.luis.artelyapp.view.messageView.MessageView
+import com.luis.artelyapp.view.ArtistProfile.ArtistProfileScreen
+import com.luis.artelyapp.view.UserProfile.UserProfileScreen
+import com.luis.artelyapp.view.UserProfile.UserProfileViewModel
+import com.luis.artelyapp.view.UserProfile.EditProfileScreen
+import com.luis.artelyapp.view.uploadwork.Upload
+import com.luis.artelyapp.view.EditArtwork.EditArtworkScreen
+import com.luis.artelyapp.view.CreatePost.CreatePostScreen
 
 sealed class Screen(val route: String) {
     object Gallery : Screen("gallery")
@@ -27,7 +29,11 @@ sealed class Screen(val route: String) {
         fun createRoute(artistName: String) = "profile/${Uri.encode(artistName)}"
     }
     object UserProfile : Screen("userprofile")
+    object EditProfile : Screen("editprofile")
     object Upload : Screen("upload")
+    object EditArtwork : Screen("editartwork/{artworkId}") {
+        fun createRoute(artworkId: Int) = "editartwork/$artworkId"
+    }
     object CreatePost : Screen("createpost")
 }
 
@@ -58,6 +64,15 @@ fun NavManager() {
             ChatView(
                 onNavigateToMessage = { chatId ->
                     navController.navigate(Screen.Message.createRoute(chatId))
+                },
+                onNavigateToGallery = {
+                    navController.navigate(Screen.Gallery.route)
+                },
+                onNavigateToCreate = {
+                    navController.navigate(Screen.CreatePost.route)
+                },
+                onNavigateToProfile = {
+                    navController.navigate(Screen.UserProfile.route)
                 }
             )
         }
@@ -69,7 +84,10 @@ fun NavManager() {
             )
         ) { backStackEntry ->
             val chatId = backStackEntry.arguments?.getInt("chatId") ?: 0
-            MessageView(chatId = chatId)
+            MessageView(
+                chatId = chatId,
+                onBackClick = { navController.popBackStack() }
+            )
         }
 
         composable(
@@ -88,10 +106,24 @@ fun NavManager() {
         composable(Screen.UserProfile.route) {
             UserProfileScreen(
                 onBackClick = { navController.popBackStack() },
+                onEditProfile = { navController.navigate(Screen.EditProfile.route) },
                 onNavigateToUpload = { navController.navigate(Screen.Upload.route) },
+                onEditArtwork = { artworkId ->
+                    navController.navigate(Screen.EditArtwork.createRoute(artworkId))
+                },
                 onNavigateToGallery = { navController.navigate(Screen.Gallery.route) },
                 onNavigateToSearch = { navController.navigate(Screen.Gallery.route) }, // Por ahora va a Gallery
                 onNavigateToCreate = { navController.navigate(Screen.CreatePost.route) },
+                viewModel = userProfileViewModel
+            )
+        }
+
+        composable(Screen.EditProfile.route) {
+            EditProfileScreen(
+                onBackClick = { navController.popBackStack() },
+                onSave = { name, bio, location, profileImageUri ->
+                    userProfileViewModel.updateProfile(name, bio, location, profileImageUri)
+                },
                 viewModel = userProfileViewModel
             )
         }
@@ -106,6 +138,31 @@ fun NavManager() {
                     navController.popBackStack()
                 }
             )
+        }
+
+        composable(
+            route = Screen.EditArtwork.route,
+            arguments = listOf(
+                navArgument("artworkId") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+            val artworkId = backStackEntry.arguments?.getInt("artworkId") ?: 0
+            val artwork = userProfileViewModel.getArtworkById(artworkId)
+
+            if (artwork != null) {
+                EditArtworkScreen(
+                    artworkId = artworkId,
+                    currentTitle = artwork.title,
+                    currentDescription = artwork.description,
+                    currentImageUri = artwork.imageUri,
+                    currentIsForSale = artwork.isForSale,
+                    onBackClick = { navController.popBackStack() },
+                    onSaveChanges = { id, title, description, imageUri, isForSale ->
+                        userProfileViewModel.updateArtwork(id, title, description, imageUri, isForSale)
+                        navController.popBackStack()
+                    }
+                )
+            }
         }
 
         composable(Screen.CreatePost.route) {
