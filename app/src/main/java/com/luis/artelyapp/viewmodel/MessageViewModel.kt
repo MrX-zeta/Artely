@@ -73,9 +73,14 @@ class MessageViewModel(
     fun loadMessagesForChat(chatId: String) {
         currentChatId = chatId
 
-        // Marcar mensajes como leídos inmediatamente al entrar al chat
+        // Primero marcar como leídos INMEDIATAMENTE
         viewModelScope.launch {
-            markMessagesAsRead(chatId)
+            Log.d(TAG, "🔵 [INMEDIATO] Marcando mensajes como leídos al entrar al chat: $chatId")
+            messageRepository.markMessagesAsRead(chatId, currentUserId).onSuccess {
+                Log.d(TAG, "✅ [INMEDIATO] Mensajes marcados como leídos exitosamente")
+            }.onFailure { e ->
+                Log.e(TAG, "❌ [INMEDIATO] Error al marcar mensajes: ${e.message}")
+            }
         }
 
         viewModelScope.launch {
@@ -87,23 +92,23 @@ class MessageViewModel(
             messageRepository.getMessagesRealtime(chatId).collect { messagesList ->
                 _messages.value = messagesList
                 Log.d(TAG, "✅ Actualización en tiempo real: ${messagesList.size} mensajes")
-
-                // Volver a marcar como leídos cada vez que llegan nuevos mensajes
-                markMessagesAsRead(chatId)
+                _isLoading.value = false
             }
         }
 
         viewModelScope.launch {
             loadOtherUserData(chatId)
-            _isLoading.value = false
         }
     }
 
     fun markMessagesAsRead(chatId: String) {
         viewModelScope.launch {
+            Log.d(TAG, "🔵 Marcando mensajes como leídos para chat: $chatId, usuario: $currentUserId")
             // Pasamos currentUserId para no marcar como leídos MIS propios mensajes
-            messageRepository.markMessagesAsRead(chatId, currentUserId).onFailure { e ->
-                 Log.e(TAG, "Error al marcar mensajes como leídos: ${e.message}")
+            messageRepository.markMessagesAsRead(chatId, currentUserId).onSuccess {
+                Log.d(TAG, "✅ Mensajes marcados como leídos exitosamente")
+            }.onFailure { e ->
+                Log.e(TAG, "❌ Error al marcar mensajes como leídos: ${e.message}")
             }
         }
     }

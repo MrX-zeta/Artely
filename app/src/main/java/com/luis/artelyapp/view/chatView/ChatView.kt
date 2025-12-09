@@ -49,11 +49,29 @@ fun ChatView(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    // Actualizar la lista de chats cada vez que se muestra esta pantalla
-    // Esto asegura que el contador de mensajes no leídos se actualice
-    androidx.compose.runtime.DisposableEffect(Unit) {
+    // Forzar actualización múltiple para asegurar que el contador se actualice
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        android.util.Log.d("ChatView", "📱 Usuario volvió a la lista de chats")
+
+        // Refresh inmediato
         viewModel.refresh()
-        onDispose { }
+        android.util.Log.d("ChatView", "🔄 Refresh #1 - Inmediato")
+
+        // Segundo refresh después de 200ms
+        kotlinx.coroutines.delay(200)
+        viewModel.refresh()
+        android.util.Log.d("ChatView", "🔄 Refresh #2 - 200ms")
+
+        // Tercer refresh después de 500ms para asegurar
+        kotlinx.coroutines.delay(300)
+        viewModel.refresh()
+        android.util.Log.d("ChatView", "🔄 Refresh #3 - 500ms total")
+    }
+
+    androidx.compose.runtime.DisposableEffect(Unit) {
+        onDispose {
+            android.util.Log.d("ChatView", "👋 Usuario salió de la lista de chats")
+        }
     }
 
     Scaffold(

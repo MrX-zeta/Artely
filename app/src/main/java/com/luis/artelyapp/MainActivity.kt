@@ -9,7 +9,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
-import com.google.firebase.database.FirebaseDatabase
 import com.luis.artelyapp.ui.theme.ArtelyAppTheme
 import com.luis.artelyapp.view.AppContent
 
@@ -24,14 +23,17 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        // Habilitar la persistencia de datos sin conexión
-        // Esto debe hacerse antes de cualquier otra llamada a FirebaseDatabase
+        // DESHABILITADO: La persistencia causa problemas con datos obsoletos en caché
+        // Especialmente con el estado isRead de los mensajes
+        /*
         try {
             FirebaseDatabase.getInstance().setPersistenceEnabled(true)
         } catch (e: Exception) {
-            // La persistencia ya podría estar habilitada si la app se reinició
             android.util.Log.w("MainActivity", "Error al habilitar la persistencia: ${e.message}")
         }
+        */
+
+        android.util.Log.d("MainActivity", "🔥 Persistencia de Firebase DESHABILITADA para evitar caché obsoleta")
 
         checkAndRequestNotificationPermission()
 

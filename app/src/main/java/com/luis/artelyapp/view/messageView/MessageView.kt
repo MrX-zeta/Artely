@@ -61,6 +61,16 @@ fun MessageView(
         viewModel.loadMessagesForChat(chatId)
     }
 
+    // DisposableEffect para detectar cuando el usuario sale del chat
+    androidx.compose.runtime.DisposableEffect(chatId) {
+        android.util.Log.d("MessageView", "✅ Usuario entró al chat: $chatId")
+
+        onDispose {
+            // Al salir del chat, los mensajes ya fueron marcados como leídos
+            android.util.Log.d("MessageView", "👋 Usuario salió del chat: $chatId")
+        }
+    }
+
     Scaffold(
         containerColor = Color(0xFF1A1A1A),
         topBar = {

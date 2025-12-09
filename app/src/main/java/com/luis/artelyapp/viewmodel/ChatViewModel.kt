@@ -65,7 +65,7 @@ class ChatViewModel(
     private fun startGlobalMessageListener() {
         viewModelScope.launch {
             messageRepository.getAllMessagesRealtime().collect { allMessages ->
-                android.util.Log.d("ChatViewModel", "🔔 Cambios detectados en mensajes globales")
+                android.util.Log.d("ChatViewModel", "🔔 Cambios detectados en mensajes - Actualizando contadores")
                 // Recargar los chats cuando detectemos cambios en los mensajes
                 val currentUserId = authRepository.getCurrentUserId()
                 if (currentUserId != null) {
@@ -73,7 +73,9 @@ class ChatViewModel(
                         onSuccess = { chatList ->
                             processChatList(chatList, currentUserId)
                         },
-                        onFailure = { /* Ignorar errores en actualizaciones automáticas */ }
+                        onFailure = { error ->
+                            android.util.Log.e("ChatViewModel", "Error al actualizar chats: ${error.message}")
+                        }
                     )
                 }
             }
@@ -92,8 +94,8 @@ class ChatViewModel(
                 chatRepository.getChatsByUser(currentUserId).fold(
                     onSuccess = { chatList ->
                         processChatList(chatList, currentUserId)
-                        // Después de cargar inicialmente, escuchar actualizaciones en tiempo real
-                        startRealtimeUpdates(currentUserId)
+                        // El startGlobalMessageListener ya maneja las actualizaciones en tiempo real
+                        android.util.Log.d("ChatViewModel", "✅ Chats cargados. Listener global activo.")
                     },
                     onFailure = { error ->
                         _uiState.value = ChatUiState.Error(
@@ -108,12 +110,14 @@ class ChatViewModel(
     }
 
     /**
+     * OBSOLETO: Ya no se usa porque startGlobalMessageListener es más eficiente
      * Inicia actualizaciones en tiempo real para los chats
      */
+    /*
     private fun startRealtimeUpdates(currentUserId: String) {
         viewModelScope.launch {
             while (true) {
-                kotlinx.coroutines.delay(3000) // Actualizar cada 3 segundos
+                kotlinx.coroutines.delay(1000) // Actualizar cada 1 segundo (más rápido)
                 chatRepository.getChatsByUser(currentUserId).fold(
                     onSuccess = { chatList ->
                         processChatList(chatList, currentUserId)
@@ -123,6 +127,7 @@ class ChatViewModel(
             }
         }
     }
+    */
 
     /**
      * Carga todos los chats desde Firebase (versión no en tiempo real)
@@ -187,6 +192,11 @@ class ChatViewModel(
 
         // Calcular mensajes no leídos (aquellos que NO envié yo y isRead es false)
         val unreadCount = messages.count { !it.isRead && it.senderId != currentUserId }
+
+        // LOG resumido solo si hay mensajes no leídos
+        if (unreadCount > 0) {
+            android.util.Log.d("ChatViewModel", "📊 Chat ${chat.id_Chat.take(8)}...: $unreadCount mensajes NO LEÍDOS de ${messages.size} totales")
+        }
 
         // Obtener tiempo del último mensaje
         val lastMessageTime = messages.lastOrNull()?.id_Message?.toLongOrNull() ?: 0L 

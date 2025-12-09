@@ -89,23 +89,52 @@ class MessageRepository {
 
     /**
      * Obtiene todos los mensajes de un chat (Una sola vez)
+     * Usa addListenerForSingleValueEvent() para SIEMPRE obtener datos frescos del servidor
      */
     suspend fun getMessagesByChat(chatId: String): Result<List<Message>> {
-        return try {
-            val snapshot = messagesRef
-                .orderByChild("id_Chat")
-                .equalTo(chatId)
-                .get()
-                .await()
+        return kotlinx.coroutines.suspendCancellableCoroutine { continuation ->
+            try {
+                val query = messagesRef
+                    .orderByChild("id_Chat")
+                    .equalTo(chatId)
 
-            val messages = snapshot.children.mapNotNull {
-                it.getValue(Message::class.java)
-            }.sortedBy { it.id_Message }
+                // 🔥 Usar addListenerForSingleValueEvent() en lugar de get()
+                // Esto SIEMPRE obtiene datos frescos del servidor, no de caché
+                val listener = object : ValueEventListener {
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        val messages = snapshot.children.mapNotNull {
+                            it.getValue(Message::class.java)
+                        }.sortedBy { it.id_Message }
 
-            Result.success(messages)
-        } catch (e: Exception) {
-            Log.e(TAG, "Error al obtener mensajes: ${e.message}")
-            Result.failure(e)
+                        val totalUnread = messages.count { !it.isRead }
+                        val readMessages = messages.count { it.isRead }
+
+                        Log.d(TAG, "✅ Obtenidos ${messages.size} mensajes FRESCOS del servidor para chat $chatId")
+                        Log.d(TAG, "   📊 Desglose: $readMessages leídos, $totalUnread NO leídos")
+
+                        // Log detallado de los primeros 3 mensajes para debug
+                        messages.take(3).forEach { msg ->
+                            Log.d(TAG, "   📨 ${msg.id_Message.take(8)}...: isRead=${msg.isRead}, content='${msg.content.take(15)}...'")
+                        }
+
+                        continuation.resume(Result.success(messages)) {}
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        Log.e(TAG, "❌ Error al obtener mensajes: ${error.message}")
+                        continuation.resume(Result.failure(error.toException())) {}
+                    }
+                }
+
+                query.addListenerForSingleValueEvent(listener)
+
+                continuation.invokeOnCancellation {
+                    query.removeEventListener(listener)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error inesperado al obtener mensajes: ${e.message}")
+                continuation.resume(Result.failure(e)) {}
+            }
         }
     }
 
@@ -123,33 +152,61 @@ class MessageRepository {
                 .await()
 
             var markedCount = 0
+            var totalMessages = 0
 
             // Actualizar cada mensaje individualmente para asegurar propagación
             for (child in snapshot.children) {
                 val message = child.getValue(Message::class.java)
                 val messageKey = child.key
+                totalMessages++
 
                 if (message != null && messageKey != null) {
-                    Log.d(TAG, "📨 Mensaje ${messageKey}: senderId=${message.senderId}, currentUser=$currentUserId, isRead=${message.isRead}")
+                    Log.d(TAG, "📨 Mensaje #$totalMessages [${messageKey.take(8)}...]: senderId=${message.senderId.take(10)}..., currentUser=${currentUserId.take(10)}..., isRead=${message.isRead}, content='${message.content.take(20)}'")
 
                     if (message.senderId != currentUserId && !message.isRead) {
-                        // Actualizar directamente el nodo individual
-                        messagesRef.child(messageKey).child("isRead").setValue(true).await()
-                        markedCount++
-                        Log.d(TAG, "✅ Mensaje ${messageKey} marcado como leído")
+                        try {
+                            // Actualizar usando updateChildren con un mapa
+                            Log.d(TAG, "✏️ Actualizando isRead=true para mensaje ${messageKey.take(8)}...")
+
+                            val updates = hashMapOf<String, Any>(
+                                "isRead" to true
+                            )
+
+                            messagesRef.child(messageKey).updateChildren(updates).await()
+                            markedCount++
+                            Log.d(TAG, "✅ Mensaje ${messageKey.take(8)}... marcado como leído exitosamente")
+
+                            // VERIFICACIÓN: Leer el mensaje actualizado para confirmar
+                            val verifySnapshot = messagesRef.child(messageKey).get().await()
+                            val verifyMessage = verifySnapshot.getValue(Message::class.java)
+                            Log.d(TAG, "🔍 VERIFICACIÓN: isRead después de actualizar = ${verifyMessage?.isRead}")
+
+                        } catch (updateError: Exception) {
+                            Log.e(TAG, "❌ Error al actualizar mensaje ${messageKey.take(8)}...: ${updateError.message}")
+                        }
+                    } else if (message.senderId == currentUserId) {
+                        Log.d(TAG, "⏭️ Omitiendo mensaje ${messageKey.take(8)}... porque lo envié YO")
+                    } else if (message.isRead) {
+                        Log.d(TAG, "✓ Mensaje ${messageKey.take(8)}... ya está marcado como leído")
                     }
+                } else {
+                    Log.w(TAG, "⚠️ Mensaje o clave nula encontrada en posición $totalMessages")
                 }
             }
 
             if (markedCount > 0) {
-                Log.d(TAG, "✅ Se marcaron $markedCount mensajes como leídos en chat $chatId")
+                Log.d(TAG, "✅✅✅ ÉXITO: Se marcaron $markedCount de $totalMessages mensajes como leídos en chat $chatId")
+                // Pequeño delay para que Firebase sincronice los cambios antes de que se recargue la lista
+                kotlinx.coroutines.delay(300)
+                Log.d(TAG, "⏰ Delay de sincronización completado - Firebase debería tener los datos actualizados")
             } else {
-                Log.d(TAG, "ℹ️ No hay mensajes para marcar como leídos en chat $chatId")
+                Log.d(TAG, "ℹ️ No hay mensajes para marcar como leídos en chat $chatId (total: $totalMessages mensajes)")
             }
             
             Result.success(true)
         } catch (e: Exception) {
-            Log.e(TAG, "❌ Error al marcar mensajes como leídos: ${e.message}", e)
+            Log.e(TAG, "❌❌❌ ERROR CRÍTICO al marcar mensajes como leídos: ${e.message}", e)
+            e.printStackTrace()
             Result.failure(e)
         }
     }
