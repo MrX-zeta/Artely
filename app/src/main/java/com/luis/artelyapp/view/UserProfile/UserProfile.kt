@@ -27,6 +27,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 
 // Colores de la paleta
 private val DarkBackground = Color(0xFF1A1A1A)
@@ -36,7 +39,6 @@ private val BorderColor = Color(0xFF333333)
 private val AccentGold = Color(0xFFD4AF37)
 private val TextSecondary = Color(0xFFAAAAAA)
 private val TextPrimary = Color(0xFFFFFFFF)
-private val TextLight = Color(0xFFE0E0E0)
 
 // Data classes
 data class UserProfileData(
@@ -45,18 +47,18 @@ data class UserProfileData(
     val location: String,
     val avatarLetter: String,
     val artworksCount: Int,
-    val followersCount: String,
+    val followersCount: Int,
     val followingCount: Int
 )
 
 data class UserArtwork(
-    val id: Int,
+    val id: String,
     val title: String,
     val artist: String,
-    val description: String = "",
-    val imageUri: android.net.Uri? = null,
-    val price: String? = null,
-    val isForSale: Boolean = false
+    val description: String,
+    val imageUri: android.net.Uri?,
+    val isForSale: Boolean = false,
+    val price: String? = null
 )
 
 enum class UserProfileTab {
@@ -70,25 +72,51 @@ fun UserProfileScreen(
     onBackClick: () -> Unit = {},
     onEditProfile: () -> Unit = {},
     onNavigateToUpload: () -> Unit = {},
-    onEditArtwork: (Int) -> Unit = {},
+    onEditArtwork: (String) -> Unit = {},
     onNavigateToGallery: () -> Unit = {},
-    onNavigateToSearch: () -> Unit = {},
-    onNavigateToCreate: () -> Unit = {},
+    onNavigateToChat: () -> Unit = {},
+    onLogout: () -> Unit = {},
     viewModel: UserProfileViewModel = viewModel()
 ) {
-    var selectedTab by remember { mutableStateOf(UserProfileTab.GALLERY) }
+    // Solo cargar el perfil si no hay datos (primera carga)
+    val uiState by viewModel.uiState.collectAsState()
     val userArtworks by viewModel.userArtworks.collectAsState()
+
+    LaunchedEffect(viewModel) {
+        // Solo recargar si el estado es Idle Y no hay obras cargadas
+        if (uiState is UserProfileUiState.Idle || (uiState is UserProfileUiState.Empty && userArtworks.isEmpty())) {
+            android.util.Log.d("UserProfileScreen", "🔄 Primera carga del perfil del usuario")
+            viewModel.reloadProfile()
+        } else {
+            android.util.Log.d("UserProfileScreen", "✅ Perfil ya cargado (${userArtworks.size} obras), no se recarga")
+        }
+    }
+
+    var selectedTab by remember { mutableStateOf(UserProfileTab.GALLERY) }
     val userProfileInfo by viewModel.userProfile.collectAsState()
+    val isArtist by viewModel.isArtist.collectAsState()
+
+    // Obtener estadísticas desde uiState (Firebase)
+    val stats = when (val state = uiState) {
+        is UserProfileUiState.Success -> Triple(state.artworksCount, state.followersCount, state.followingCount)
+        else -> Triple(0, 0, 0)
+    }
 
     // Datos del usuario desde el ViewModel
+    val userName = userProfileInfo.name.trim()
+    val initial = userName.firstOrNull()?.uppercaseChar()?.toString() ?: "?"
+
+    android.util.Log.d("UserProfileScreen", "👤 Nombre del usuario: '$userName'")
+    android.util.Log.d("UserProfileScreen", "🔤 Inicial generada: '$initial'")
+
     val userProfile = UserProfileData(
-        name = userProfileInfo.name,
-        bio = userProfileInfo.bio,
-        location = userProfileInfo.location,
-        avatarLetter = userProfileInfo.name.firstOrNull()?.toString()?.uppercase() ?: "A",
-        artworksCount = userArtworks.size,
-        followersCount = "2.3K",
-        followingCount = 38
+        name = userName,
+        bio = userProfileInfo.bio.trim(),
+        location = userProfileInfo.location.trim(),
+        avatarLetter = initial,
+        artworksCount = stats.first,  // Usar datos de Firebase
+        followersCount = stats.second,
+        followingCount = stats.third
     )
 
     val galleryArtworks = userArtworks.filter { !it.isForSale }
@@ -100,8 +128,7 @@ fun UserProfileScreen(
         bottomBar = {
             BottomNavigationBar(
                 onNavigateToGallery = onNavigateToGallery,
-                onNavigateToSearch = onNavigateToSearch,
-                onNavigateToCreate = onNavigateToCreate,
+                onNavigateToChat = onNavigateToChat,
                 onNavigateToProfile = { /* Ya estamos en perfil */ }
             )
         }
@@ -109,31 +136,79 @@ fun UserProfileScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
+                .windowInsetsPadding(WindowInsets.statusBars)
+                .padding(innerPadding),
+            contentPadding = PaddingValues(top = 16.dp, bottom = 16.dp)
         ) {
             item { TopBar(onBackClick = onBackClick) }
             item {
                 UserHeader(
                     profile = userProfile,
-                    onEditProfile = onEditProfile
+                    profileImageUri = userProfileInfo.profileImageUri,
+                    onEditProfile = onEditProfile,
+                    isArtist = isArtist,
+                    onLogout = {
+                        viewModel.logout()
+                        onLogout()
+                    }
                 )
             }
-            item {
-                TabSection(
-                    selectedTab = selectedTab,
-                    onTabSelected = { tab -> selectedTab = tab }
-                )
-            }
-            item {
-                CollectionsSection(
-                    artworks = when(selectedTab) {
-                        UserProfileTab.GALLERY -> galleryArtworks
-                        UserProfileTab.FOR_SALE -> forSaleArtworks
-                    },
-                    selectedTab = selectedTab,
-                    onNavigateToUpload = onNavigateToUpload,
-                    onEditArtwork = onEditArtwork
-                )
+
+            // Solo mostrar tabs y colecciones si es artista
+            if (isArtist) {
+                item {
+                    TabSection(
+                        selectedTab = selectedTab,
+                        onTabSelected = { tab -> selectedTab = tab }
+                    )
+                }
+                item {
+                    CollectionsSection(
+                        artworks = when(selectedTab) {
+                            UserProfileTab.GALLERY -> galleryArtworks
+                            UserProfileTab.FOR_SALE -> forSaleArtworks
+                        },
+                        selectedTab = selectedTab,
+                        onNavigateToUpload = onNavigateToUpload,
+                        onEditArtwork = onEditArtwork
+                    )
+                }
+            } else {
+                // Para customers, mostrar mensaje informativo
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(32.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = "🎨",
+                                fontSize = 64.sp
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = "Explora obras de arte",
+                                color = TextPrimary,
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = TextAlign.Center
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "Navega por la galería para descubrir\namazantes obras de arte",
+                                color = TextSecondary,
+                                fontSize = 14.sp,
+                                textAlign = TextAlign.Center,
+                                lineHeight = 20.sp
+                            )
+                        }
+                    }
+                }
             }
             // No spacer necesario; Scaffold gestiona el espacio con bottomBar
         }
@@ -141,102 +216,88 @@ fun UserProfileScreen(
 }
 
 @Composable
+@Suppress("UNUSED_PARAMETER")
 private fun TopBar(
     onBackClick: () -> Unit = {}
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(81.dp)
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
+    Column(
+        modifier = Modifier.fillMaxWidth()
     ) {
-        Text(
-            text = "ArtelyGallery",
-            color = TextPrimary,
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Normal,
-            letterSpacing = 1.sp,
-            modifier = Modifier.weight(1f)
-        )
-
-        Spacer(modifier = Modifier.width(16.dp))
-
-        // Search Icon
-        Box(
+        Row(
             modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape),
-            contentAlignment = Alignment.Center
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "🔍",
+                text = "ArtelyGallery",
                 color = TextPrimary,
-                fontSize = 10.sp
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Normal,
+                letterSpacing = 1.sp,
+                modifier = Modifier.weight(1f)
             )
         }
 
-        Spacer(modifier = Modifier.width(16.dp))
-
-        // Heart Icon
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "❤️",
-                fontSize = 18.sp
-            )
-        }
+        HorizontalDivider(color = BorderColor, thickness = 1.dp)
     }
-
-    HorizontalDivider(color = BorderColor, thickness = 1.dp)
 }
 
 @Composable
 private fun UserHeader(
     profile: UserProfileData,
-    onEditProfile: () -> Unit = {}
+    profileImageUri: android.net.Uri? = null,
+    onEditProfile: () -> Unit = {},
+    isArtist: Boolean = true,
+    onLogout: () -> Unit = {}
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(
-                Brush.linearGradient(
-                    colors = listOf(
-                        DarkBackground.copy(alpha = 0.8f),
-                        SecondaryBackground.copy(alpha = 0.8f)
+    Column(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    Brush.linearGradient(
+                        colors = listOf(
+                            DarkBackground.copy(alpha = 0.8f),
+                            SecondaryBackground.copy(alpha = 0.8f)
+                        )
                     )
                 )
-            )
-            .padding(16.dp)
-    ) {
-        Column {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Profile Avatar
+                .padding(20.dp)
+        ) {
+            Column {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                // Profile Avatar - mostrar foto si existe, sino la inicial
                 Box(
                     modifier = Modifier
                         .size(80.dp)
-                        .background(
-                            Brush.linearGradient(
-                                colors = listOf(AccentGold, Color(0xFFB8941F))
-                            ),
-                            CircleShape
-                        )
-                        .border(3.dp, AccentGold.copy(alpha = 0.3f), CircleShape)
-                        .shadow(4.dp, CircleShape),
+                        .shadow(8.dp, CircleShape)
+                        .clip(CircleShape)
+                        .background(if (profileImageUri == null) AccentGold else Color.Transparent)
+                        .border(3.dp, AccentGold.copy(alpha = 0.3f), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = profile.avatarLetter,
-                        color = DarkBackground,
-                        fontSize = 32.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                    if (profileImageUri != null) {
+                        AsyncImage(
+                            model = profileImageUri,
+                            contentDescription = "Foto de perfil",
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(CircleShape),
+                            contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                        )
+                    } else {
+                        Text(
+                            text = profile.avatarLetter,
+                            color = Color.Black,
+                            fontSize = 40.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.width(16.dp))
@@ -252,79 +313,118 @@ private fun UserHeader(
                         letterSpacing = 0.5.sp
                     )
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                    // Solo mostrar bio y ubicación si es artista
+                    if (isArtist) {
+                        Spacer(modifier = Modifier.height(8.dp))
 
-                    Text(
-                        text = profile.bio,
-                        color = TextSecondary,
-                        fontSize = 14.sp,
-                        lineHeight = 19.6.sp
-                    )
+                        Text(
+                            text = profile.bio,
+                            color = TextSecondary,
+                            fontSize = 14.sp,
+                            lineHeight = 19.6.sp
+                        )
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
 
-                    Text(
-                        text = "📍 ${profile.location}",
-                        color = AccentGold,
-                        fontSize = 13.sp
-                    )
+                        Text(
+                            text = "📍 ${profile.location}",
+                            color = AccentGold,
+                            fontSize = 13.sp
+                        )
+                    }
                 }
 
-                // Edit Profile Button
-                Button(
-                    onClick = onEditProfile,
-                    modifier = Modifier
-                        .width(100.dp)
-                        .height(32.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = AccentGold,
-                        contentColor = Color.Black
-                    ),
-                    shape = RoundedCornerShape(16.dp),
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-                    elevation = ButtonDefaults.buttonElevation(
-                        defaultElevation = 4.dp,
-                        pressedElevation = 2.dp
-                    )
+                // Columna de botones
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalAlignment = Alignment.End
                 ) {
-                    Text(
-                        text = "Editar Perfil",
-                        color = Color.Black,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        letterSpacing = 0.5.sp
-                    )
+                    // Edit Profile Button
+                    Button(
+                        onClick = onEditProfile,
+                        modifier = Modifier
+                            .width(110.dp)
+                            .height(32.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = AccentGold,
+                            contentColor = Color.Black
+                        ),
+                        shape = RoundedCornerShape(16.dp),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                        elevation = ButtonDefaults.buttonElevation(
+                            defaultElevation = 4.dp,
+                            pressedElevation = 2.dp
+                        )
+                    ) {
+                        Text(
+                            text = "Editar Perfil",
+                            color = Color.Black,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            letterSpacing = 0.5.sp
+                        )
+                    }
+
+                    // Logout Button
+                    Button(
+                        onClick = onLogout,
+                        modifier = Modifier
+                            .width(110.dp)
+                            .height(32.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF8B0000), // Rojo oscuro
+                            contentColor = Color.White
+                        ),
+                        shape = RoundedCornerShape(16.dp),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                        elevation = ButtonDefaults.buttonElevation(
+                            defaultElevation = 4.dp,
+                            pressedElevation = 2.dp
+                        )
+                    ) {
+                        Text(
+                            text = "Cerrar Sesión",
+                            color = Color.White,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            letterSpacing = 0.5.sp
+                        )
+                    }
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            // Solo mostrar estadísticas si es artista
+            if (isArtist) {
+                Spacer(modifier = Modifier.height(24.dp))
 
-            // Stats Card
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(84.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = CardBackground.copy(alpha = 0.6f)
-                ),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Row(
+                // Stats Card - mostrar 0 cuando no hay datos
+                Card(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly,
-                    verticalAlignment = Alignment.CenterVertically
+                        .fillMaxWidth()
+                        .height(84.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = CardBackground.copy(alpha = 0.6f)
+                    ),
+                    shape = RoundedCornerShape(12.dp)
                 ) {
-                    StatItem("${profile.artworksCount}", "OBRAS")
-                    StatItem(profile.followersCount, "SEGUIDORES")
-                    StatItem("${profile.followingCount}", "SIGUIENDO")
+                    Row(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        StatItem(profile.artworksCount.toString(), "OBRAS")
+                        StatItem(profile.followersCount.toString(), "SEGUIDORES")
+                        StatItem(profile.followingCount.toString(), "SIGUIENDO")
+                    }
                 }
             }
         }
-    }
+        }
 
-    HorizontalDivider(color = BorderColor, thickness = 1.dp)
+        HorizontalDivider(color = BorderColor, thickness = 1.dp)
+    }
 }
 
 @Composable
@@ -428,7 +528,7 @@ private fun CollectionsSection(
     artworks: List<UserArtwork>,
     selectedTab: UserProfileTab,
     onNavigateToUpload: () -> Unit = {},
-    onEditArtwork: (Int) -> Unit = {}
+    onEditArtwork: (String) -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -650,29 +750,19 @@ private fun UserArtworkCard(
                 modifier = Modifier
                     .padding(10.dp)
                     .fillMaxWidth(),
-                verticalArrangement = Arrangement.Top
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Título con altura máxima controlada
+                // Título de la obra
                 Text(
                     text = artwork.title,
-                    color = TextLight,
+                    color = AccentGold,
                     fontSize = 14.sp,
-                    fontWeight = FontWeight.Normal,
+                    fontWeight = FontWeight.SemiBold,
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
-                    lineHeight = 16.sp
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                // Información del artista
-                Text(
-                    text = artwork.artist,
-                    color = AccentGold,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Normal,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    lineHeight = 18.sp,
+                    textAlign = TextAlign.Center
                 )
             }
         }
@@ -683,23 +773,18 @@ private fun UserArtworkCard(
 private fun BottomNavigationBar(
     modifier: Modifier = Modifier,
     onNavigateToGallery: () -> Unit = {},
-    onNavigateToSearch: () -> Unit = {},
-    onNavigateToCreate: () -> Unit = {},
+    onNavigateToChat: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {}
 ) {
-    Box(
+    Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(89.dp)
+            .height(80.dp)
             .background(DarkBackground)
+            .padding(horizontal = 12.dp),
+        horizontalArrangement = Arrangement.SpaceAround,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp, vertical = 16.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
             BottomNavItem(
                 icon = "🏠",
                 label = "Inicio",
@@ -707,16 +792,10 @@ private fun BottomNavigationBar(
                 onClick = onNavigateToGallery
             )
             BottomNavItem(
-                icon = "🔍",
-                label = "Buscar",
+                icon = "💬",
+                label = "Chat",
                 isSelected = false,
-                onClick = onNavigateToSearch
-            )
-            BottomNavItem(
-                icon = "🎨",
-                label = "Crear",
-                isSelected = false,
-                onClick = onNavigateToCreate
+                onClick = onNavigateToChat
             )
             BottomNavItem(
                 icon = "👤",
@@ -724,14 +803,6 @@ private fun BottomNavigationBar(
                 isSelected = true,
                 onClick = onNavigateToProfile
             )
-        }
-
-        // Línea superior
-        HorizontalDivider(
-            color = BorderColor,
-            thickness = 1.dp,
-            modifier = Modifier.align(Alignment.TopCenter)
-        )
     }
 }
 
@@ -742,29 +813,20 @@ private fun BottomNavItem(
     isSelected: Boolean,
     onClick: () -> Unit = {}
 ) {
-    val backgroundColor = if (isSelected) AccentGold.copy(alpha = 0.1f) else Color.Transparent
     val textColor = if (isSelected) AccentGold else TextSecondary
 
     Column(
-        modifier = Modifier
-            .size(60.dp, 58.dp)
-            .background(backgroundColor, RoundedCornerShape(8.dp))
-            .clickable { onClick() },
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        modifier = Modifier.clickable { onClick() }
     ) {
         Text(
             text = icon,
-            color = textColor,
-            fontSize = if (icon == "🔍" || icon == "🎨" || icon == "👤") 10.sp else 11.sp
+            fontSize = 18.sp
         )
-
-        Spacer(modifier = Modifier.height(4.dp))
-
         Text(
             text = label,
-            color = textColor,
-            fontSize = 12.sp
+            fontSize = 12.sp,
+            color = textColor
         )
     }
 }

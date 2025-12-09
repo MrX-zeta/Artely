@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.luis.artelyapp" />
+                  <option name="mobileSdkAppId" value="1:817441855876:android:3f5949af1101a7f5eb65d1" />
+                  <option name="projectId" value="artely-app" />
+                  <option name="projectNumber" value="817441855876" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

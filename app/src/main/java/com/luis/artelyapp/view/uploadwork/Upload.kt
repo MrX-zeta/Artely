@@ -31,10 +31,11 @@ import coil.request.ImageRequest
 @Composable
 fun Upload(
     onBackClick: () -> Unit = {},
-    onPublishWork: (title: String, description: String, imageUri: Uri?, isForSale: Boolean, price: String?) -> Unit = { _, _, _, _, _ -> }
+    onPublishWork: (title: String, description: String, technique: String, imageUri: Uri?, isForSale: Boolean, price: String?) -> Unit = { _, _, _, _, _, _ -> }
 ) {
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
+    var technique by remember { mutableStateOf("") }
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     var isForSale by remember { mutableStateOf(false) }
     var price by remember { mutableStateOf("") }
@@ -99,8 +100,7 @@ fun Upload(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(20.dp)
+                        .padding(20.dp)
                 ) {
                     // Image Upload Section
                     Column(
@@ -148,27 +148,9 @@ fun Upload(
                                 }
                             }
                         }
-
-                        // Select Image Button
-                        Button(
-                            onClick = { imagePickerLauncher.launch("image/*") },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(48.dp)
-                                .border(1.dp, goldenColor, RoundedCornerShape(6.dp)),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = mediumGray
-                            ),
-                            shape = RoundedCornerShape(6.dp)
-                        ) {
-                            Text(
-                                text = if (selectedImageUri != null) "Cambiar imagen" else "Seleccionar imagen",
-                                color = goldenColor,
-                                fontSize = 15.sp,
-                                textAlign = TextAlign.Center
-                            )
-                        }
                     }
+
+                    Spacer(modifier = Modifier.height(20.dp))
 
                     // Title Input
                     Column(
@@ -204,6 +186,8 @@ fun Upload(
                             shape = RoundedCornerShape(6.dp)
                         )
                     }
+
+                    Spacer(modifier = Modifier.height(20.dp))
 
                     // Description Input
                     Column(
@@ -242,6 +226,45 @@ fun Upload(
                             maxLines = 5
                         )
                     }
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    // Technique Input
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = "TÉCNICA",
+                            color = goldenColor,
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.Normal,
+                            letterSpacing = 0.5.sp
+                        )
+
+                        OutlinedTextField(
+                            value = technique,
+                            onValueChange = { technique = it },
+                            placeholder = {
+                                Text(
+                                    text = "Ej: Óleo sobre lienzo, Acuarela, Digital...",
+                                    color = lightGray,
+                                    fontSize = 15.sp
+                                )
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedBorderColor = mediumGray,
+                                unfocusedBorderColor = mediumGray,
+                                focusedContainerColor = darkGray,
+                                unfocusedContainerColor = darkGray,
+                                focusedTextColor = Color.White,
+                                unfocusedTextColor = Color.White
+                            ),
+                            shape = RoundedCornerShape(6.dp)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(20.dp))
 
                     // Sale Status Section
                     Column(
@@ -344,7 +367,7 @@ fun Upload(
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(40.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
 
                     // Action Buttons
                     Row(
@@ -376,7 +399,7 @@ fun Upload(
                                 val priceToSend = if (isForSale && price.isNotBlank()) price else null
                                 if (title.isNotBlank() && description.isNotBlank() && selectedImageUri != null &&
                                     (!isForSale || (isForSale && price.isNotBlank()))) {
-                                    onPublishWork(title, description, selectedImageUri, isForSale, priceToSend)
+                                    onPublishWork(title, description, technique, selectedImageUri, isForSale, priceToSend)
                                 }
                             },
                             modifier = Modifier
@@ -398,6 +421,8 @@ fun Upload(
                             )
                         }
                     }
+
+                    Spacer(modifier = Modifier.height(20.dp))
                 }
             }
         }

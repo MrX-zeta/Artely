@@ -15,15 +15,20 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,16 +43,37 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.luis.artelyapp.viewmodel.auth.LoginViewModel
+import com.luis.artelyapp.viewmodel.auth.LoginUiState
 
 @Composable
 fun LoginScreen(
+    viewModel: LoginViewModel = viewModel(),
     onLogin: () -> Unit = {},
     onBack: () -> Unit = {},
     onRegister: () -> Unit = {}
 ) {
-    val username = remember { mutableStateOf("") }
-    val password = remember { mutableStateOf("") }
-    val showPassword = remember { mutableStateOf(false) }
+    val email by viewModel.email.collectAsState()
+    val password by viewModel.password.collectAsState()
+    val showPassword by viewModel.showPassword.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
+
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // Limpiar campos del formulario cuando se muestra la pantalla de login
+    // NOTA: NO hacer logout aquí, el logout ya se hizo desde UserProfileViewModel
+    LaunchedEffect(Unit) {
+        android.util.Log.d("LoginScreen", "🔄 LoginScreen mostrada - limpiando campos del formulario")
+        viewModel.clearFields()
+    }
+
+    // Mostrar errores en Snackbar
+    LaunchedEffect(uiState) {
+        if (uiState is LoginUiState.Error) {
+            snackbarHostState.showSnackbar((uiState as LoginUiState.Error).message)
+        }
+    }
 
     val gold = Color(0xFFD4AF37)
 
@@ -68,13 +94,20 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(30.dp))
 
             // Header
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start, verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = { onBack() }) {
-                    Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Atrás", tint = gold)
+            Box(modifier = Modifier.fillMaxWidth()) {
+                IconButton(
+                    onClick = { onBack() },
+                    modifier = Modifier.align(Alignment.CenterStart)
+                ) {
+                    Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Atrás", tint = gold)
                 }
-                Spacer(modifier = Modifier.weight(1f))
-                Text(text = "Artely", color = gold, fontSize = 20.sp, fontWeight = FontWeight.Medium)
-                Spacer(modifier = Modifier.weight(1f))
+                Text(
+                    text = "Artely",
+                    color = gold,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.align(Alignment.Center)
+                )
             }
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -99,16 +132,17 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(28.dp))
 
-            // Username
+            // Email
             Column(modifier = Modifier.fillMaxWidth()) {
-                Text(text = "Nombre de usuario", color = Color(0xFFE0E0E0), fontSize = 14.sp)
+                Text(text = "Correo electrónico", color = Color(0xFFE0E0E0), fontSize = 14.sp)
                 Spacer(modifier = Modifier.height(6.dp))
                 OutlinedTextField(
-                    value = username.value,
-                    onValueChange = { username.value = it },
+                    value = email,
+                    onValueChange = { viewModel.onEmailChange(it) },
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("Ingresa tu nombre de usuario", color = Color(0xFF777777)) },
+                    placeholder = { Text("Ingresa tu correo", color = Color(0xFF777777)) },
                     singleLine = true,
+                    enabled = uiState !is LoginUiState.Loading,
                     shape = RoundedCornerShape(12.dp)
                 )
             }
@@ -120,17 +154,18 @@ fun LoginScreen(
                 Text(text = "Contraseña", color = Color(0xFFE0E0E0), fontSize = 14.sp)
                 Spacer(modifier = Modifier.height(6.dp))
                 OutlinedTextField(
-                    value = password.value,
-                    onValueChange = { password.value = it },
+                    value = password,
+                    onValueChange = { viewModel.onPasswordChange(it) },
                     modifier = Modifier.fillMaxWidth(),
                     placeholder = { Text("Ingresa tu contraseña", color = Color(0xFF777777)) },
                     singleLine = true,
-                    visualTransformation = if (showPassword.value) VisualTransformation.None else PasswordVisualTransformation(),
+                    enabled = uiState !is LoginUiState.Loading,
+                    visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
                     trailingIcon = {
                         Text(
-                            text = if (showPassword.value) "🙈" else "👁️",
+                            text = if (showPassword) "🙈" else "👁️",
                             color = gold,
-                            modifier = Modifier.clickable { showPassword.value = !showPassword.value }
+                            modifier = Modifier.clickable { viewModel.togglePasswordVisibility() }
                         )
                     },
                     shape = RoundedCornerShape(12.dp)
@@ -146,10 +181,16 @@ fun LoginScreen(
                     .height(50.dp)
                     .clip(RoundedCornerShape(12.dp))
                     .background(brush = Brush.linearGradient(listOf(Color(0xFFD4AF37), Color(0xFFB8941F))))
-                    .clickable { onLogin() },
+                    .clickable(enabled = uiState !is LoginUiState.Loading) {
+                        viewModel.login(onSuccess = onLogin)
+                    },
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = "Iniciar Sesión", color = Color(0xFF1A1A1A), fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                if (uiState is LoginUiState.Loading) {
+                    CircularProgressIndicator(color = Color(0xFF1A1A1A), modifier = Modifier.height(24.dp))
+                } else {
+                    Text(text = "Iniciar Sesión", color = Color(0xFF1A1A1A), fontSize = 16.sp, fontWeight = FontWeight.Bold)
+                }
             }
 
             Spacer(modifier = Modifier.height(50.dp))
@@ -185,6 +226,16 @@ fun LoginScreen(
                     )
                 )
         )
+
+        // Snackbar para errores
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            SnackbarHost(hostState = snackbarHostState)
+        }
     }
 }
 

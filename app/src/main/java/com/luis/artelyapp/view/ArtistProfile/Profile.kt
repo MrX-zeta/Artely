@@ -15,15 +15,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
+import coil.compose.AsyncImage
 import com.luis.artelyapp.model.Artist
 import com.luis.artelyapp.model.ArtistStats
 import com.luis.artelyapp.model.Artwork
 import com.luis.artelyapp.model.ProfileTab
+import java.io.File
 
 private val DarkBackground = Color(0xFF1A1A1A)
 private val SecondaryBackground = Color(0xFF2D2D2D)
@@ -36,314 +39,159 @@ private val TextLight = Color(0xFFE0E0E0)
 
 @Composable
 fun ArtistProfileScreen(
-    artistName: String = "Aristote",
-    onBackClick: () -> Unit = {}
+    artistId: String? = null,
+    artistName: String? = null,
+    viewModel: com.luis.artelyapp.viewmodel.ArtistViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
+    onBackClick: () -> Unit = {},
+    onArtworkClick: (String) -> Unit = {},
+    onNavigateToGallery: () -> Unit = {},
+    onNavigateToChat: () -> Unit = {},
+    onNavigateToUserProfile: () -> Unit = {}
 ) {
     // Estado local para las pestañas
     var selectedTab by remember { mutableStateOf(ProfileTab.GALLERY) }
 
-    // Datos de muestra usando el modelo Artist correcto
-    val sampleArtist = remember(artistName) {
-        when (artistName) {
-            "Vincent van Gogh" -> Artist(
-                id_User = 2,
-                UserName = "Vincent van Gogh",
-                Email = "vincent@artely.com",
-                Psswd = "",
-                Role = "Artist",
-                Bio = "Pintor postimpresionista neerlandés que figura entre las figuras más famosas e influyentes de la historia del arte occidental.",
-                Location = "Países Bajos"
-            )
-            "Leonardo da Vinci" -> Artist(
-                id_User = 3,
-                UserName = "Leonardo da Vinci",
-                Email = "leonardo@artely.com",
-                Psswd = "",
-                Role = "Artist",
-                Bio = "Polímata del Renacimiento italiano. Fue a la vez pintor, anatomista, arquitecto, paleontólogo, botánico, escritor, escultor, filósofo, ingeniero, inventor, músico, poeta y urbanista.",
-                Location = "Italia"
-            )
-            "Miguel Ángel" -> Artist(
-                id_User = 4,
-                UserName = "Miguel Ángel",
-                Email = "michelangelo@artely.com",
-                Psswd = "",
-                Role = "Artist",
-                Bio = "Arquitecto, escultor y pintor italiano renacentista, considerado uno de los más grandes artistas de la historia.",
-                Location = "Italia"
-            )
-            "Claude Monet" -> Artist(
-                id_User = 5,
-                UserName = "Claude Monet",
-                Email = "claude@artely.com",
-                Psswd = "",
-                Role = "Artist",
-                Bio = "Pintor francés, uno de los creadores del impresionismo. El término impresionismo deriva del título de su obra Impresión, sol naciente.",
-                Location = "Francia"
-            )
-            "Wassily Kandinsky" -> Artist(
-                id_User = 6,
-                UserName = "Wassily Kandinsky",
-                Email = "wassily@artely.com",
-                Psswd = "",
-                Role = "Artist",
-                Bio = "Pintor ruso, precursor de la abstracción en pintura y teórico del arte. Se considera que con él comienza la abstracción lírica.",
-                Location = "Rusia"
-            )
-            else -> Artist(
-                id_User = 1,
-                UserName = "Aristote",
-                Email = "aristote@artely.com",
-                Psswd = "",
-                Role = "Artist",
-                Bio = "Artista visual especializado en retratos contemporáneos y arte figurativo",
-                Location = "París, Francia"
-            )
-        }
-    }
+    // Observar el estado del ViewModel
+    val uiState by viewModel.uiState.collectAsState()
 
-    val sampleStats = remember(artistName) {
-        when (artistName) {
-            "Vincent van Gogh" -> ArtistStats(
-                totalArtworks = 2100,
-                followers = 15600,
-                following = 23,
-                likes = 45200
-            )
-            "Leonardo da Vinci" -> ArtistStats(
-                totalArtworks = 156,
-                followers = 25400,
-                following = 5,
-                likes = 78900
-            )
-            "Miguel Ángel" -> ArtistStats(
-                totalArtworks = 89,
-                followers = 18700,
-                following = 12,
-                likes = 56800
-            )
-            "Claude Monet" -> ArtistStats(
-                totalArtworks = 892,
-                followers = 12300,
-                following = 45,
-                likes = 34500
-            )
-            "Wassily Kandinsky" -> ArtistStats(
-                totalArtworks = 456,
-                followers = 8900,
-                following = 67,
-                likes = 23400
-            )
-            else -> ArtistStats(
-                totalArtworks = 127,
-                followers = 2300,
-                following = 156,
-                likes = 8945
-            )
+    // Cargar datos cuando se monta el componente
+    LaunchedEffect(artistId, artistName) {
+        when {
+            artistId != null -> viewModel.loadArtistData(artistId)
+            artistName != null -> viewModel.loadArtistByName(artistName)
+            else -> viewModel.loadArtistData("1")
         }
-    }
-
-    val sampleArtworksGallery = remember(artistName) {
-        when (artistName) {
-            "Vincent van Gogh" -> listOf(
-                Artwork(
-                    id_ArtWork = 1,
-                    id_Artist = 2,
-                    Title = "Noche Estrellada",
-                    Description = "Una de las pinturas más famosas del mundo",
-                    Price = 0.0,
-                    Technique = "Óleo sobre lienzo",
-                    Status = "Exhibition",
-                    ImageUrl = ""
-                ),
-                Artwork(
-                    id_ArtWork = 2,
-                    id_Artist = 2,
-                    Title = "Los Girasoles",
-                    Description = "Serie de pinturas al óleo",
-                    Price = 0.0,
-                    Technique = "Óleo sobre lienzo",
-                    Status = "Exhibition",
-                    ImageUrl = ""
-                ),
-                Artwork(
-                    id_ArtWork = 3,
-                    id_Artist = 2,
-                    Title = "Autorretrato",
-                    Description = "Autorretrato del artista",
-                    Price = 0.0,
-                    Technique = "Óleo sobre lienzo",
-                    Status = "Exhibition",
-                    ImageUrl = ""
-                )
-            )
-            "Leonardo da Vinci" -> listOf(
-                Artwork(
-                    id_ArtWork = 1,
-                    id_Artist = 3,
-                    Title = "La Gioconda",
-                    Description = "Retrato de Lisa Gherardini",
-                    Price = 0.0,
-                    Technique = "Óleo sobre tabla de álamo",
-                    Status = "Exhibition",
-                    ImageUrl = ""
-                ),
-                Artwork(
-                    id_ArtWork = 2,
-                    id_Artist = 3,
-                    Title = "La Última Cena",
-                    Description = "Pintura mural original",
-                    Price = 0.0,
-                    Technique = "Temple y óleo",
-                    Status = "Exhibition",
-                    ImageUrl = ""
-                )
-            )
-            "Miguel Ángel" -> listOf(
-                Artwork(
-                    id_ArtWork = 1,
-                    id_Artist = 4,
-                    Title = "David",
-                    Description = "Escultura de mármol blanco",
-                    Price = 0.0,
-                    Technique = "Escultura en mármol",
-                    Status = "Exhibition",
-                    ImageUrl = ""
-                ),
-                Artwork(
-                    id_ArtWork = 2,
-                    id_Artist = 4,
-                    Title = "La Piedad",
-                    Description = "Escultura renacentista",
-                    Price = 0.0,
-                    Technique = "Escultura en mármol",
-                    Status = "Exhibition",
-                    ImageUrl = ""
-                )
-            )
-            "Claude Monet" -> listOf(
-                Artwork(
-                    id_ArtWork = 1,
-                    id_Artist = 5,
-                    Title = "Impresión, sol naciente",
-                    Description = "Obra que dio nombre al impresionismo",
-                    Price = 0.0,
-                    Technique = "Óleo sobre lienzo",
-                    Status = "Exhibition",
-                    ImageUrl = ""
-                ),
-                Artwork(
-                    id_ArtWork = 2,
-                    id_Artist = 5,
-                    Title = "Nenúfares",
-                    Description = "Serie de aproximadamente 250 pinturas",
-                    Price = 0.0,
-                    Technique = "Óleo sobre lienzo",
-                    Status = "Exhibition",
-                    ImageUrl = ""
-                )
-            )
-            "Wassily Kandinsky" -> listOf(
-                Artwork(
-                    id_ArtWork = 1,
-                    id_Artist = 6,
-                    Title = "Composición VIII",
-                    Description = "Obra abstracta geométrica",
-                    Price = 0.0,
-                    Technique = "Óleo sobre lienzo",
-                    Status = "Exhibition",
-                    ImageUrl = ""
-                ),
-                Artwork(
-                    id_ArtWork = 2,
-                    id_Artist = 6,
-                    Title = "Improvisación 28",
-                    Description = "Abstracción lírica",
-                    Price = 0.0,
-                    Technique = "Óleo sobre lienzo",
-                    Status = "Exhibition",
-                    ImageUrl = ""
-                )
-            )
-            else -> listOf(
-                Artwork(
-                    id_ArtWork = 1,
-                    id_Artist = 1,
-                    Title = "La Gioconda",
-                    Description = "Retrato clásico",
-                    Price = 0.0,
-                    Technique = "Óleo sobre lienzo",
-                    Status = "Exhibition",
-                    ImageUrl = ""
-                ),
-                Artwork(
-                    id_ArtWork = 2,
-                    id_Artist = 1,
-                    Title = "Retrato Contemporáneo",
-                    Description = "Obra de arte figurativo",
-                    Price = 0.0,
-                    Technique = "Técnica mixta",
-                    Status = "Available",
-                    ImageUrl = ""
-                )
-            )
-        }
-    }
-
-    val sampleArtworksForSale = remember(artistName) {
-        listOf(
-            Artwork(
-                id_ArtWork = 3,
-                id_Artist = 1,
-                Title = "Obra Especial",
-                Description = "Una pieza única para coleccionistas",
-                Price = 3500.0,
-                Technique = "Acrílico sobre lienzo",
-                Status = "Available",
-                ImageUrl = ""
-            ),
-            Artwork(
-                id_ArtWork = 4,
-                id_Artist = 1,
-                Title = "Edición Limitada",
-                Description = "Serie limitada de 10 piezas",
-                Price = 1200.0,
-                Technique = "Serigrafía",
-                Status = "Available",
-                ImageUrl = ""
-            )
-        )
     }
 
     Scaffold(
         containerColor = DarkBackground,
         bottomBar = {
-            BottomNavigationBar()
+            BottomNavigationBar(
+                onNavigateToGallery = onNavigateToGallery,
+                onNavigateToChat = onNavigateToChat,
+                onNavigateToProfile = onNavigateToUserProfile
+            )
         }
     ) { innerPadding ->
-        // Contenido scrollable ocupa todo el espacio disponible (respeta innerPadding)
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-        ) {
-            item { TopBar(onBackClick = onBackClick) }
-            item { ArtistHeader(sampleArtist, sampleStats) }
-            item {
-                TabSection(
-                    selectedTab = selectedTab,
-                    onTabSelected = { tab -> selectedTab = tab }
-                )
+        when (val state = uiState) {
+            is com.luis.artelyapp.viewmodel.ArtistUiState.Idle -> {
+                // Estado inicial - no hacer nada o mostrar placeholder
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Selecciona un artista",
+                        color = TextSecondary,
+                        fontSize = 16.sp
+                    )
+                }
             }
-            item {
-                CollectionsSection(
-                    artworks = when(selectedTab) {
-                        ProfileTab.GALLERY -> sampleArtworksGallery
-                        ProfileTab.FOR_SALE -> sampleArtworksForSale
+
+            is com.luis.artelyapp.viewmodel.ArtistUiState.Loading -> {
+                // Mostrar indicador de carga
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        CircularProgressIndicator(
+                            color = AccentGold,
+                            modifier = Modifier.size(48.dp)
+                        )
+                        Text(
+                            text = "Cargando perfil...",
+                            color = TextSecondary,
+                            fontSize = 16.sp
+                        )
                     }
-                )
+                }
             }
-            // No spacer needed; Scaffold lo gestiona
+
+            is com.luis.artelyapp.viewmodel.ArtistUiState.Error -> {
+                // Mostrar mensaje de error
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                        modifier = Modifier.padding(32.dp)
+                    ) {
+                        Text(
+                            text = "❌",
+                            fontSize = 48.sp
+                        )
+                        Text(
+                            text = "Error al cargar el perfil",
+                            color = TextPrimary,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center
+                        )
+                        Text(
+                            text = state.message,
+                            color = TextSecondary,
+                            fontSize = 14.sp,
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Button(
+                            onClick = { viewModel.refresh() },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = AccentGold
+                            )
+                        ) {
+                            Text("Reintentar", color = DarkBackground)
+                        }
+                    }
+                }
+            }
+
+            is com.luis.artelyapp.viewmodel.ArtistUiState.Success -> {
+                // Mostrar contenido del perfil
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding)
+                ) {
+                    item { TopBar(onBackClick = onBackClick) }
+                    item {
+                        ArtistHeader(
+                            artist = state.artist,
+                            stats = state.stats,
+                            isOwnProfile = state.isOwnProfile,
+                            isFollowing = state.isFollowing,
+                            onFollowClick = { viewModel.toggleFollow(state.artist.id_User) }
+                        )
+                    }
+                    item {
+                        TabSection(
+                            selectedTab = selectedTab,
+                            onTabSelected = { tab -> selectedTab = tab }
+                        )
+                    }
+                    item {
+                        CollectionsSection(
+                            artworks = when(selectedTab) {
+                                ProfileTab.GALLERY -> viewModel.getGalleryArtworks()
+                                ProfileTab.FOR_SALE -> viewModel.getForSaleArtworks()
+                            },
+                            onArtworkClick = onArtworkClick
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -384,37 +232,6 @@ private fun TopBar(
             letterSpacing = 1.sp,
             modifier = Modifier.weight(1f)
         )
-
-        Spacer(modifier = Modifier.width(16.dp))
-
-        // Search Icon
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "🔍",
-                color = TextPrimary,
-                fontSize = 10.sp
-            )
-        }
-
-        Spacer(modifier = Modifier.width(16.dp))
-
-        // Heart Icon
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "❤️",
-                fontSize = 18.sp
-            )
-        }
     }
 
     HorizontalDivider(color = BorderColor, thickness = 1.dp)
@@ -423,7 +240,10 @@ private fun TopBar(
 @Composable
 private fun ArtistHeader(
     artist: Artist,
-    stats: ArtistStats
+    stats: ArtistStats,
+    isOwnProfile: Boolean = false,
+    isFollowing: Boolean = false,
+    onFollowClick: () -> Unit = {}
 ) {
     Box(
         modifier = Modifier
@@ -440,35 +260,57 @@ private fun ArtistHeader(
     ) {
         Column {
             Row(
+                modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Profile Avatar
+                // Profile Avatar - mostrar foto si existe, sino inicial
                 Box(
                     modifier = Modifier
                         .size(80.dp)
                         .background(
-                            Brush.linearGradient(
-                                colors = listOf(AccentGold, Color(0xFFB8941F))
-                            ),
+                            if (artist.profileImageUrl.isEmpty()) {
+                                Brush.linearGradient(
+                                    colors = listOf(AccentGold, Color(0xFFB8941F))
+                                )
+                            } else {
+                                Brush.linearGradient(
+                                    colors = listOf(Color.Transparent, Color.Transparent)
+                                )
+                            },
                             CircleShape
                         )
                         .border(3.dp, AccentGold.copy(alpha = 0.3f), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = artist.Email.take(1).uppercase(),
-                        color = DarkBackground,
-                        fontSize = 32.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                    if (artist.profileImageUrl.isNotEmpty()) {
+                        // Mostrar foto de perfil
+                        AsyncImage(
+                            model = android.net.Uri.parse(artist.profileImageUrl),
+                            contentDescription = "Foto de perfil de ${artist.UserName}",
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clip(CircleShape),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        // Mostrar la inicial del nombre del artista
+                        val initial = artist.UserName.trim().firstOrNull()?.uppercaseChar()?.toString() ?: "?"
+                        Text(
+                            text = initial,
+                            color = Color.Black,
+                            fontSize = 36.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.width(16.dp))
 
-                Column {
+                Column(modifier = Modifier.weight(1f)) {
+                    // Mostrar nombre o placeholder
                     Text(
-                        text = artist.UserName,
-                        color = TextPrimary,
+                        text = if (artist.UserName.isNotBlank()) artist.UserName else "Sin nombre",
+                        color = if (artist.UserName.isNotBlank()) TextPrimary else TextSecondary,
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 0.5.sp
@@ -476,8 +318,9 @@ private fun ArtistHeader(
 
                     Spacer(modifier = Modifier.height(8.dp))
 
+                    // Mostrar bio o placeholder
                     Text(
-                        text = artist.Bio,
+                        text = if (artist.Bio.isNotBlank()) artist.Bio else "Sin biografía",
                         color = TextSecondary,
                         fontSize = 14.sp,
                         lineHeight = 19.6.sp
@@ -485,17 +328,54 @@ private fun ArtistHeader(
 
                     Spacer(modifier = Modifier.height(8.dp))
 
+                    // Mostrar ubicación o placeholder
                     Text(
-                        text = "📍 ${artist.Location}",
-                        color = AccentGold,
+                        text = if (artist.Location.isNotBlank()) "📍 ${artist.Location}" else "📍 Sin ubicación",
+                        color = if (artist.Location.isNotBlank()) AccentGold else TextSecondary,
                         fontSize = 13.sp
                     )
+                }
+
+                // Botón Editar Perfil o Seguir
+                if (isOwnProfile) {
+                    Button(
+                        onClick = { /* TODO: Navegar a editar perfil */ },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = AccentGold
+                        ),
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier.padding(start = 8.dp)
+                    ) {
+                        Text(
+                            text = "Editar Perfil",
+                            color = DarkBackground,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                } else {
+                    // Botón Seguir/Siguiendo para visitantes
+                    Button(
+                        onClick = onFollowClick,
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = if (isFollowing) Color(0xFF333333) else AccentGold
+                        ),
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier.padding(start = 8.dp)
+                    ) {
+                        Text(
+                            text = if (isFollowing) "Siguiendo" else "Seguir",
+                            color = if (isFollowing) TextSecondary else DarkBackground,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Stats Card
+            // Stats Card - mostrar estadísticas reales
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -512,8 +392,9 @@ private fun ArtistHeader(
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    StatItem("${stats.totalArtworks}", "OBRAS")
-                    StatItem("${stats.followers}", "SEGUIDORES")
+                    StatItem(stats.totalArtworks.toString(), "OBRAS")
+                    StatItem(stats.followers.toString(), "SEGUIDORES")
+                    StatItem(stats.following.toString(), "SIGUIENDO")
                 }
             }
         }
@@ -622,7 +503,8 @@ private fun TabSection(
 
 @Composable
 private fun CollectionsSection(
-    artworks: List<Artwork>
+    artworks: List<Artwork>,
+    onArtworkClick: (String) -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -663,26 +545,30 @@ private fun CollectionsSection(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(200.dp),
+                    .padding(32.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     Text(
                         text = "🎨",
-                        fontSize = 48.sp,
-                        color = TextSecondary
+                        fontSize = 64.sp
                     )
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = "Aún no tienes obras en galería",
+                        color = TextPrimary,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center
+                    )
 
                     Text(
-                        text = "Aún no hay obras en esta sección",
+                        text = "Comparte tu primera obra de arte con la comunidad",
                         color = TextSecondary,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Medium,
+                        fontSize = 14.sp,
                         textAlign = TextAlign.Center
                     )
                 }
@@ -702,7 +588,10 @@ private fun CollectionsSection(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center
                     ) {
-                        ArtPieceCard(artwork)
+                        ArtPieceCard(
+                            artwork = artwork,
+                            onClick = { onArtworkClick(artwork.id_ArtWork) }
+                        )
                     }
                 }
             }
@@ -713,18 +602,22 @@ private fun CollectionsSection(
 }
 
 @Composable
-private fun ArtPieceCard(artwork: Artwork) {
+private fun ArtPieceCard(
+    artwork: Artwork,
+    onClick: () -> Unit = {}
+) {
     Card(
         modifier = Modifier
             .width(280.dp) // Tamaño original restaurado
-            .height(200.dp), // Altura mantenida para acomodar más texto
+            .height(200.dp) // Altura mantenida para acomodar más texto
+            .clickable { onClick() },
         colors = CardDefaults.cardColors(
             containerColor = CardBackground
         ),
         shape = RoundedCornerShape(12.dp)
     ) {
         Column {
-            // Image placeholder
+            // Image - mostrar la imagen real si existe
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -736,13 +629,35 @@ private fun ArtPieceCard(artwork: Artwork) {
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = artwork.Title,
-                    color = Color(0xFF777777),
-                    fontSize = 12.sp,
-                    fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
-                    textAlign = TextAlign.Center
-                )
+                if (artwork.ImageUrl.isNotEmpty()) {
+                    val file = File(artwork.ImageUrl)
+                    if (file.exists()) {
+                        AsyncImage(
+                            model = file,
+                            contentDescription = artwork.Title,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        // Placeholder si el archivo no existe
+                        Text(
+                            text = artwork.Title,
+                            color = Color(0xFF777777),
+                            fontSize = 12.sp,
+                            fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                } else {
+                    // Placeholder si no hay URL
+                    Text(
+                        text = artwork.Title,
+                        color = Color(0xFF777777),
+                        fontSize = 12.sp,
+                        fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
 
             // Card content
@@ -761,7 +676,7 @@ private fun ArtPieceCard(artwork: Artwork) {
 
                 Text(
                     text = if (artwork.Status == "Available" && artwork.Price > 0) {
-                        "$${String.format("%.2f", artwork.Price)}"
+                        "$${String.format(java.util.Locale.US, "%.2f", artwork.Price)}"
                     } else {
                         artwork.Description
                     },
@@ -777,32 +692,37 @@ private fun ArtPieceCard(artwork: Artwork) {
 
 @Composable
 private fun BottomNavigationBar(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onNavigateToGallery: () -> Unit = {},
+    onNavigateToChat: () -> Unit = {},
+    onNavigateToProfile: () -> Unit = {}
 ) {
-    Box(
+    Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(89.dp)
+            .height(80.dp)
             .background(DarkBackground)
+            .padding(horizontal = 12.dp),
+        horizontalArrangement = Arrangement.SpaceAround,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp, vertical = 16.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            BottomNavItem("🏠", "Inicio", isSelected = true)
-            BottomNavItem("🔍", "Buscar", isSelected = false)
-            BottomNavItem("🎨", "Crear", isSelected = false)
-            BottomNavItem("👤", "Perfil", isSelected = false)
-        }
-
-        // Línea superior
-        HorizontalDivider(
-            color = BorderColor,
-            thickness = 1.dp,
-            modifier = Modifier.align(Alignment.TopCenter)
+        BottomNavItem(
+            icon = "🏠",
+            label = "Inicio",
+            isSelected = false,
+            onClick = onNavigateToGallery
+        )
+        BottomNavItem(
+            icon = "💬",
+            label = "Chat",
+            isSelected = false,
+            onClick = onNavigateToChat
+        )
+        BottomNavItem(
+            icon = "👤",
+            label = "Perfil",
+            isSelected = true,
+            onClick = onNavigateToProfile
         )
     }
 }
@@ -811,30 +731,23 @@ private fun BottomNavigationBar(
 private fun BottomNavItem(
     icon: String,
     label: String,
-    isSelected: Boolean
+    isSelected: Boolean,
+    onClick: () -> Unit = {}
 ) {
-    val backgroundColor = if (isSelected) AccentGold.copy(alpha = 0.1f) else Color.Transparent
     val textColor = if (isSelected) AccentGold else TextSecondary
 
     Column(
-        modifier = Modifier
-            .size(60.dp, 58.dp)
-            .background(backgroundColor, RoundedCornerShape(8.dp)),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+        modifier = Modifier.clickable { onClick() }
     ) {
         Text(
             text = icon,
-            color = textColor,
-            fontSize = if (icon == "🔍" || icon == "🎨" || icon == "👤") 10.sp else 11.sp
+            fontSize = 18.sp
         )
-
-        Spacer(modifier = Modifier.height(4.dp))
-
         Text(
             text = label,
-            color = textColor,
-            fontSize = 12.sp
+            fontSize = 12.sp,
+            color = textColor
         )
     }
 }

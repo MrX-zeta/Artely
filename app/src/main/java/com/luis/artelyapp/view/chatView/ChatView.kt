@@ -34,16 +34,27 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.luis.artelyapp.viewmodel.ChatViewModel
 import com.luis.artelyapp.viewmodel.ChatDisplay
+import coil.compose.AsyncImage
+import androidx.compose.ui.layout.ContentScale
+import com.luis.artelyapp.viewmodel.ChatUiState
+import java.text.SimpleDateFormat
+import java.util.*
 
 @Composable
 fun ChatView(
-    onNavigateToMessage: (Int) -> Unit = {}, // Recibe el id del chat
+    viewModel: ChatViewModel = viewModel(),
+    onNavigateToMessage: (String) -> Unit = {}, // Recibe el id del chat
     onNavigateToGallery: () -> Unit = {},
-    onNavigateToCreate: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {}
 ) {
-    val viewModel: ChatViewModel = viewModel()
-    val chats by viewModel.chats.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
+
+    // Actualizar la lista de chats cada vez que se muestra esta pantalla
+    // Esto asegura que el contador de mensajes no leídos se actualice
+    androidx.compose.runtime.DisposableEffect(Unit) {
+        viewModel.refresh()
+        onDispose { }
+    }
 
     Scaffold(
         containerColor = Color(0xFF1A1A1A),
@@ -51,7 +62,6 @@ fun ChatView(
         bottomBar = {
             BottomNavigationBar(
                 onNavigateToGallery = onNavigateToGallery,
-                onNavigateToCreate = onNavigateToCreate,
                 onNavigateToProfile = onNavigateToProfile
             )
         }
@@ -70,17 +80,132 @@ fun ChatView(
                 modifier = Modifier.padding(16.dp)
             )
 
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-            ) {
-                items(chats) { chat ->
-                    ChatItem(
-                        chat = chat,
-                        onChatClick = { onNavigateToMessage(chat.chat.id_Chat) }
-                    )
-                    HorizontalDivider(color = Color(0xFF2A2A2A), thickness = 1.dp)
+            when (val state = uiState) {
+                is ChatUiState.Loading -> {
+                    // Estado de carga
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            androidx.compose.material3.CircularProgressIndicator(
+                                color = Color(0xFFD4AF37)
+                            )
+                            Text(
+                                text = "Cargando chats...",
+                                color = Color(0xFFAAAAAA),
+                                fontSize = 16.sp
+                            )
+                        }
+                    }
+                }
+
+                is ChatUiState.Empty -> {
+                    // No hay chats
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(32.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            Text(
+                                text = "💬",
+                                fontSize = 64.sp
+                            )
+                            Text(
+                                text = "No tienes conversaciones",
+                                color = Color.White,
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                            )
+                            Text(
+                                text = "Inicia una conversación con un artista para comenzar",
+                                color = Color(0xFFAAAAAA),
+                                fontSize = 14.sp,
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            androidx.compose.material3.Button(
+                                onClick = { viewModel.refresh() },
+                                colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                                    containerColor = Color(0xFFD4AF37)
+                                )
+                            ) {
+                                Text("Actualizar", color = Color(0xFF1A1A1A))
+                            }
+                        }
+                    }
+                }
+
+                is ChatUiState.Error -> {
+                    // Error al cargar
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(32.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            Text(
+                                text = "❌",
+                                fontSize = 48.sp
+                            )
+                            Text(
+                                text = "Error al cargar los chats",
+                                color = Color.White,
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                            )
+                            Text(
+                                text = state.message,
+                                color = Color(0xFFAAAAAA),
+                                fontSize = 14.sp,
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            androidx.compose.material3.Button(
+                                onClick = { viewModel.refresh() },
+                                colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                                    containerColor = Color(0xFFD4AF37)
+                                )
+                            ) {
+                                Text("Reintentar", color = Color(0xFF1A1A1A))
+                            }
+                        }
+                    }
+                }
+
+                is ChatUiState.Success -> {
+                    // Mostrar lista de chats
+                    val chats = state.chats
+
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                    ) {
+                        items(chats) { chat ->
+                            ChatItem(
+                                chat = chat,
+                                onChatClick = { onNavigateToMessage(chat.chat.id_Chat) }
+                            )
+                            HorizontalDivider(color = Color(0xFF2A2A2A), thickness = 1.dp)
+                        }
+                    }
                 }
             }
         }
@@ -116,7 +241,7 @@ fun ChatItem(
 ) {
     val lastMessage = chat.messages.lastOrNull()
     val lastMessageText = lastMessage?.content ?: "No hay mensajes"
-    val time = "Hoy" // Podrías calcular esto del timestamp del último mensaje
+    val time = "Hoy" // Aquí podrías formatear chat.lastMessageTime
 
     Row(
         modifier = Modifier
@@ -125,51 +250,98 @@ fun ChatItem(
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Avatar
+        // Avatar - Mostrar foto de perfil o inicial
         Box(
             modifier = Modifier
                 .size(50.dp)
                 .clip(CircleShape)
-                .background(Color(0xFFD4AF37)),
+                .background(
+                    if (chat.profileImageUrl.isEmpty())
+                        Color(0xFFD4AF37)
+                    else
+                        Color.Transparent
+                ),
             contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = chat.userName.take(2).uppercase(),
-                color = Color.Black,
-                fontWeight = FontWeight.Bold
-            )
+            if (chat.profileImageUrl.isNotEmpty()) {
+                // Mostrar foto de perfil
+                AsyncImage(
+                    model = android.net.Uri.parse(chat.profileImageUrl),
+                    contentDescription = "Foto de perfil de ${chat.userName}",
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(CircleShape),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                // Mostrar inicial del nombre
+                Text(
+                    text = chat.userName.take(2).uppercase(),
+                    color = Color.Black,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
+                )
+            }
         }
 
         Spacer(modifier = Modifier.width(12.dp))
 
+        // Columna Central: Nombre y Mensaje
         Column(
             modifier = Modifier.weight(1f)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = chat.userName,
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
-                )
-                Text(
-                    text = time,
-                    color = Color(0xFF888888),
-                    fontSize = 12.sp
-                )
-            }
+            Text(
+                text = chat.userName,
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp
+            )
 
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
                 text = lastMessageText,
-                color = Color(0xFFAAAAAA),
+                color = if (chat.unreadCount > 0) Color.White else Color(0xFFAAAAAA), // Mensaje en blanco si no se ha leído
+                fontWeight = if (chat.unreadCount > 0) FontWeight.Bold else FontWeight.Normal, // Negrita si no se ha leído
                 fontSize = 14.sp,
-                maxLines = 2
+                maxLines = 1,
+                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
             )
+        }
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        // Columna Derecha: Hora y Badge
+        Column(
+            horizontalAlignment = Alignment.End,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = time,
+                color = if (chat.unreadCount > 0) Color(0xFFD4AF37) else Color(0xFF888888),
+                fontSize = 12.sp,
+                fontWeight = if (chat.unreadCount > 0) FontWeight.Bold else FontWeight.Normal
+            )
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            // Badge de mensajes no leídos
+            if (chat.unreadCount > 0) {
+                Box(
+                    modifier = Modifier
+                        .size(22.dp)
+                        .clip(CircleShape)
+                        .background(Color(0xFFD4AF37)), // Color dorado/amarillo de la app
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = if (chat.unreadCount > 9) "+9" else chat.unreadCount.toString(),
+                        color = Color.Black,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
         }
     }
 }
@@ -177,7 +349,6 @@ fun ChatItem(
 @Composable
 private fun BottomNavigationBar(
     onNavigateToGallery: () -> Unit = {},
-    onNavigateToCreate: () -> Unit = {},
     onNavigateToProfile: () -> Unit = {}
 ) {
     Row(
@@ -189,9 +360,8 @@ private fun BottomNavigationBar(
         horizontalArrangement = Arrangement.SpaceAround,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Cambiamos la etiqueta inferior de 'Buscar' a 'Chat' y mantenemos el icono de chat
-        val items = listOf("Inicio" to "🏠", "Chat" to "💬", "Agregar" to "➕", "Perfil" to "👤")
-        val callbacks = listOf(onNavigateToGallery, {}, onNavigateToCreate, onNavigateToProfile)
+        val items = listOf("Inicio" to "🏠", "Chat" to "💬", "Perfil" to "👤")
+        val callbacks = listOf(onNavigateToGallery, {}, onNavigateToProfile)
 
         items.forEachIndexed { index, pair ->
             Column(

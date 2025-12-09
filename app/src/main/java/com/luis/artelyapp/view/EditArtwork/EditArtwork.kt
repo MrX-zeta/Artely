@@ -30,14 +30,14 @@ import coil.request.ImageRequest
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditArtworkScreen(
-    artworkId: Int,
+    artworkId: String,
     currentTitle: String,
     currentDescription: String,
     currentImageUri: Uri?,
     currentIsForSale: Boolean,
     currentPrice: String? = null,
     onBackClick: () -> Unit = {},
-    onSaveChanges: (artworkId: Int, title: String, description: String, imageUri: Uri?, isForSale: Boolean, price: String?) -> Unit = { _, _, _, _, _, _ -> }
+    onSaveChanges: (artworkId: String, title: String, description: String, imageUri: Uri?, isForSale: Boolean, price: String?) -> Unit = { _, _, _, _, _, _ -> }
 ) {
     var title by remember { mutableStateOf(currentTitle) }
     var description by remember { mutableStateOf(currentDescription) }

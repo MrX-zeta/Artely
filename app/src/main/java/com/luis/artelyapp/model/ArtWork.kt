@@ -1,12 +1,40 @@
 package com.luis.artelyapp.model
 
+import com.google.firebase.database.PropertyName
+
 data class Artwork(
-    val id_ArtWork: Int,
-    val id_Artist: Int,
-    val Title: String,
-    val Description: String,
-    val Price: Double,
-    val Technique: String,
-    val Status: String,
-    val ImageUrl: String
-)
+    @get:PropertyName("id_ArtWork")
+    @set:PropertyName("id_ArtWork")
+    var id_ArtWork: String = "",
+
+    @get:PropertyName("id_Artist")
+    @set:PropertyName("id_Artist")
+    var id_Artist: String = "",
+
+    @get:PropertyName("title")
+    @set:PropertyName("title")
+    var Title: String = "",
+
+    @get:PropertyName("description")
+    @set:PropertyName("description")
+    var Description: String = "",
+
+    @get:PropertyName("price")
+    @set:PropertyName("price")
+    var Price: Double = 0.0,
+
+    @get:PropertyName("technique")
+    @set:PropertyName("technique")
+    var Technique: String = "",
+
+    @get:PropertyName("status")
+    @set:PropertyName("status")
+    var Status: String = "",
+
+    @get:PropertyName("imageUrl")
+    @set:PropertyName("imageUrl")
+    var ImageUrl: String = ""
+) {
+    // Constructor sin argumentos requerido por Firebase
+    constructor() : this("", "", "", "", 0.0, "", "", "")
+}

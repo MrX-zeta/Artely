@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="AgentMigrationStateService">
-    <option name="migrationStatus" value="IN_PROGRESS" />
     <option name="pendingSessionIds">
       <option value="33929349-aa09-4709-8c67-f66633f1abc2" />
-      <option value="7243cec9-b4e6-4f39-b5a8-101e77e35e38" />
-      <option value="8b2a875b-d053-4861-8fe4-8900ee5ea217" />
       <option value="c9b6dc88-ae31-4187-b988-00239f0edb6d" />
       <option value="e533075e-fb18-4af0-93f7-e5a4e40566f3" />
     </option>
@@ -14,16 +11,16 @@
         <entry key="33929349-aa09-4709-8c67-f66633f1abc2">
           <value>
             <set>
-              <option value="167d2b9e-8aba-4446-a19e-aee1ef686d38" />
-              <option value="3bf6ab24-a10f-4696-b3ea-16fa645bc0be" />
-              <option value="5d4847d5-4297-427b-822d-82bd0b6834be" />
-              <option value="85199d1a-1451-483d-845b-eef6d005e0ae" />
-              <option value="a859630f-9965-4be1-89c4-46382c1b23b1" />
-              <option value="b383db30-83d9-4b0c-99bd-bdeb51d1b154" />
-              <option value="b42a2218-7270-4dd1-ba6e-0edd6b01626b" />
               <option value="e14eb6e9-78d3-42f5-b1b0-e797b5216683" />
               <option value="e7d35dd9-2ca3-4c45-b792-23a7912d86ad" />
+              <option value="a859630f-9965-4be1-89c4-46382c1b23b1" />
+              <option value="b42a2218-7270-4dd1-ba6e-0edd6b01626b" />
+              <option value="b383db30-83d9-4b0c-99bd-bdeb51d1b154" />
+              <option value="5d4847d5-4297-427b-822d-82bd0b6834be" />
               <option value="fc40c8c8-4b46-4440-9c79-d2bc79c9a98f" />
+              <option value="85199d1a-1451-483d-845b-eef6d005e0ae" />
+              <option value="3bf6ab24-a10f-4696-b3ea-16fa645bc0be" />
+              <option value="167d2b9e-8aba-4446-a19e-aee1ef686d38" />
             </set>
           </value>
         </entry>
@@ -52,7 +49,13 @@
       </map>
     </option>
     <pendingWorkingSetItems>
-      <entry key="33929349-aa09-4709-8c67-f66633f1abc2" />
+      <entry key="33929349-aa09-4709-8c67-f66633f1abc2">
+        <set>
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/navigation/NavManager.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/view/UserProfile/UserProfileViewModel.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/view/EditArtwork/EditArtwork.kt" />
+        </set>
+      </entry>
       <entry key="c9b6dc88-ae31-4187-b988-00239f0edb6d" />
       <entry key="e533075e-fb18-4af0-93f7-e5a4e40566f3" />
     </pendingWorkingSetItems>

@@ -17,32 +17,30 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import java.io.File
 
 @Composable
 fun GalleryScreen(
+    viewModel: GalleryViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
     onNavigateToChat: () -> Unit = {},
     onArtistClick: (String) -> Unit = {},
+    onArtworkClick: (String, String) -> Unit = { _, _ -> },
     onNavigateToProfile: () -> Unit = {}
 ) {
-    // Datos de ejemplo locales (temporal hasta conectar ViewModel/Repositorio)
-    val artworksSample = listOf(
-        Artwork(1, "Noche Estrellada", "Vincent van Gogh", "Una de las obras más reconocidas de Van Gogh, pintada en 1889."),
-        Artwork(2, "La Gioconda", "Leonardo da Vinci"),
-        Artwork(3, "David", "Miguel Ángel"),
-        Artwork(4, "Impresión, sol naciente", "Claude Monet"),
-        Artwork(5, "Composición VIII", "Wassily Kandinsky"),
-        Artwork(6, "Retrato Desconocido", "Artista Anónimo")
-    )
+    val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
         containerColor = Color.Transparent,
@@ -51,7 +49,7 @@ fun GalleryScreen(
             BottomNavigationBar(onTabSelected = { index ->
                 when (index) {
                     1 -> onNavigateToChat()
-                    3 -> onNavigateToProfile()
+                    2 -> onNavigateToProfile()
                 }
             })
         }
@@ -59,52 +57,172 @@ fun GalleryScreen(
         Column(modifier = Modifier.padding(innerPadding)) {
             Header()
 
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                item {
-                    Text(
-                        text = "Obra Destacada",
-                        color = Color(0xFFE0E0E0),
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Light,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-                    FeaturedArtworkCard(artworksSample.first(), onArtistClick = onArtistClick)
+            when (val state = uiState) {
+                is GalleryUiState.Loading -> {
+                    // Estado de carga
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            androidx.compose.material3.CircularProgressIndicator(
+                                color = Color(0xFFD4AF37)
+                            )
+                            Text(
+                                text = "Cargando obras...",
+                                color = Color(0xFFAAAAAA),
+                                fontSize = 16.sp
+                            )
+                        }
+                    }
                 }
 
-                item {
-                    Text(
-                        text = "Colecciones",
-                        color = Color(0xFFE0E0E0),
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Light,
-                        modifier = Modifier.padding(vertical = 8.dp)
-                    )
-                }
-
-                val gridItems = artworksSample.drop(1).chunked(2)
-                gridItems.forEach { row ->
-                    item {
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            for (art in row) {
-                                Box(modifier = Modifier.weight(1f)) {
-                                    ArtworkCard(art, onArtistClick = onArtistClick)
-                                }
-                            }
-                            if (row.size == 1) {
-                                Spacer(modifier = Modifier.weight(1f))
+                is GalleryUiState.Empty -> {
+                    // No hay obras disponibles
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(32.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            Text(
+                                text = "🎨",
+                                fontSize = 64.sp
+                            )
+                            Text(
+                                text = "No hay obras disponibles",
+                                color = Color(0xFFE0E0E0),
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                            )
+                            Text(
+                                text = "Sé el primero en compartir tu arte con la comunidad",
+                                color = Color(0xFFAAAAAA),
+                                fontSize = 14.sp,
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            androidx.compose.material3.Button(
+                                onClick = { viewModel.refresh() },
+                                colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                                    containerColor = Color(0xFFD4AF37)
+                                )
+                            ) {
+                                Text("Actualizar", color = Color(0xFF1A1A1A))
                             }
                         }
                     }
                 }
 
-                item {
-                    Spacer(modifier = Modifier.height(20.dp))
+                is GalleryUiState.Error -> {
+                    // Error al cargar
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(32.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            Text(
+                                text = "❌",
+                                fontSize = 48.sp
+                            )
+                            Text(
+                                text = "Error al cargar las obras",
+                                color = Color(0xFFE0E0E0),
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                            )
+                            Text(
+                                text = state.message,
+                                color = Color(0xFFAAAAAA),
+                                fontSize = 14.sp,
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            androidx.compose.material3.Button(
+                                onClick = { viewModel.refresh() },
+                                colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                                    containerColor = Color(0xFFD4AF37)
+                                )
+                            ) {
+                                Text("Reintentar", color = Color(0xFF1A1A1A))
+                            }
+                        }
+                    }
+                }
+
+                is GalleryUiState.Success -> {
+                    // Mostrar obras
+                    val artworks = state.artworks
+
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        item {
+                            Text(
+                                text = "Obra Destacada",
+                                color = Color(0xFFE0E0E0),
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Light,
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            )
+                            FeaturedArtworkCard(artworks.first(), onArtworkClick = onArtworkClick)
+                        }
+
+                        if (artworks.size > 1) {
+                            item {
+                                Text(
+                                    text = "Colecciones",
+                                    color = Color(0xFFE0E0E0),
+                                    fontSize = 20.sp,
+                                    fontWeight = FontWeight.Light,
+                                    modifier = Modifier.padding(vertical = 8.dp)
+                                )
+                            }
+
+                            val gridItems = artworks.drop(1).chunked(2)
+                            gridItems.forEach { row ->
+                                item {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                    ) {
+                                        for (art in row) {
+                                            Box(modifier = Modifier.weight(1f)) {
+                                                ArtworkCard(art, onArtworkClick = onArtworkClick)
+                                            }
+                                        }
+                                        if (row.size == 1) {
+                                            Spacer(modifier = Modifier.weight(1f))
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        item {
+                            Spacer(modifier = Modifier.height(20.dp))
+                        }
+                    }
                 }
             }
         }
@@ -132,12 +250,12 @@ fun Header() {
 }
 
 @Composable
-fun FeaturedArtworkCard(artwork: Artwork, onArtistClick: (String) -> Unit = {}) {
+fun FeaturedArtworkCard(artwork: com.luis.artelyapp.model.Artwork, onArtworkClick: (String, String) -> Unit = { _, _ -> }) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
-            .clickable { onArtistClick(artwork.artist) },
+            .clickable { onArtworkClick(artwork.id_ArtWork, artwork.id_Artist) },
         shape = RoundedCornerShape(12.dp)
     ) {
         Column(modifier = Modifier.background(
@@ -150,13 +268,42 @@ fun FeaturedArtworkCard(artwork: Artwork, onArtistClick: (String) -> Unit = {}) 
                     .background(Color(0xFF333333)),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = "\"${artwork.title}\" - ${artwork.artist}", color = Color(0xFFAAAAAA))
+                if (artwork.ImageUrl.isNotEmpty()) {
+                    val file = File(artwork.ImageUrl)
+                    if (file.exists()) {
+                        AsyncImage(
+                            model = file,
+                            contentDescription = artwork.Title,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        Text(text = "\"${artwork.Title}\"", color = Color(0xFFAAAAAA))
+                    }
+                } else {
+                    Text(text = "\"${artwork.Title}\"", color = Color(0xFFAAAAAA))
+                }
             }
             Column(modifier = Modifier.padding(12.dp)) {
-                Text(text = artwork.title, color = Color(0xFFE0E0E0), fontSize = 18.sp)
-                Text(text = artwork.artist, color = Color(0xFFD4AF37), fontSize = 14.sp)
-                if (!artwork.description.isNullOrBlank()) {
-                    Text(text = artwork.description, color = Color(0xFFAAAAAA), fontSize = 13.sp, modifier = Modifier.padding(top = 8.dp))
+                Text(text = artwork.Title, color = Color(0xFFE0E0E0), fontSize = 18.sp)
+                Text(text = artwork.Technique, color = Color(0xFFD4AF37), fontSize = 14.sp)
+                if (artwork.Description.isNotEmpty()) {
+                    Text(
+                        text = artwork.Description,
+                        color = Color(0xFFAAAAAA),
+                        fontSize = 13.sp,
+                        modifier = Modifier.padding(top = 8.dp),
+                        maxLines = 2
+                    )
+                }
+                if (artwork.Price > 0) {
+                    Text(
+                        text = "$${String.format("%.2f", artwork.Price)}",
+                        color = Color(0xFF4CAF50),
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
                 }
             }
         }
@@ -164,12 +311,12 @@ fun FeaturedArtworkCard(artwork: Artwork, onArtistClick: (String) -> Unit = {}) 
 }
 
 @Composable
-fun ArtworkCard(art: Artwork, onArtistClick: (String) -> Unit = {}) {
+fun ArtworkCard(art: com.luis.artelyapp.model.Artwork, onArtworkClick: (String, String) -> Unit = { _, _ -> }) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(6.dp)
-            .clickable { onArtistClick(art.artist) },
+            .clickable { onArtworkClick(art.id_ArtWork, art.id_Artist) },
         shape = RoundedCornerShape(12.dp)
     ) {
         Column(modifier = Modifier.background(Color(0xFF2A2A2A))) {
@@ -180,11 +327,51 @@ fun ArtworkCard(art: Artwork, onArtistClick: (String) -> Unit = {}) {
                     .background(Color(0xFF333333)),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = art.title, color = Color(0xFF777777), fontStyle = androidx.compose.ui.text.font.FontStyle.Italic)
+                if (art.ImageUrl.isNotEmpty()) {
+                    val file = File(art.ImageUrl)
+                    if (file.exists()) {
+                        AsyncImage(
+                            model = file,
+                            contentDescription = art.Title,
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    } else {
+                        Text(
+                            text = art.Title,
+                            color = Color(0xFF777777),
+                            fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+                        )
+                    }
+                } else {
+                    Text(
+                        text = art.Title,
+                        color = Color(0xFF777777),
+                        fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+                    )
+                }
             }
             Column(modifier = Modifier.padding(10.dp)) {
-                Text(text = art.title, color = Color(0xFFE0E0E0), fontSize = 14.sp)
-                Text(text = art.artist, color = Color(0xFFD4AF37), fontSize = 12.sp)
+                Text(
+                    text = art.Title,
+                    color = Color(0xFFE0E0E0),
+                    fontSize = 14.sp,
+                    maxLines = 1
+                )
+                Text(
+                    text = art.Technique,
+                    color = Color(0xFFD4AF37),
+                    fontSize = 12.sp,
+                    maxLines = 1
+                )
+                if (art.Price > 0) {
+                    Text(
+                        text = "$${String.format("%.2f", art.Price)}",
+                        color = Color(0xFF4CAF50),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
             }
         }
     }
@@ -201,8 +388,7 @@ fun BottomNavigationBar(onTabSelected: (Int) -> Unit = {}) {
         horizontalArrangement = Arrangement.SpaceAround,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Cambiamos la etiqueta inferior de 'Buscar' a 'Chat' y mantenemos el icono de chat
-        val items = listOf("Inicio" to "🏠", "Chat" to "💬", "Agregar" to "➕", "Perfil" to "👤")
+        val items = listOf("Inicio" to "🏠", "Chat" to "💬", "Perfil" to "👤")
         items.forEachIndexed { index, pair ->
             Column(horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.clickable { onTabSelected(index) }) {

@@ -1,4 +1,4 @@
-package com.luis.artelyapp.view.ArtistProfile
+package com.luis.artelyapp.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

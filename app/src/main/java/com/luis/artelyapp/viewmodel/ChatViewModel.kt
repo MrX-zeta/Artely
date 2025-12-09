@@ -1,82 +1,238 @@
 package com.luis.artelyapp.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.luis.artelyapp.model.Chat
 import com.luis.artelyapp.model.Message
+import com.luis.artelyapp.model.Artist
+import com.luis.artelyapp.model.Customer
+import com.luis.artelyapp.repository.ChatRepository
+import com.luis.artelyapp.repository.MessageRepository
+import com.luis.artelyapp.repository.ArtistRepository
+import com.luis.artelyapp.repository.CustomerRepository
+import com.luis.artelyapp.repository.AuthRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
-// Modelo auxiliar para la UI que combina Chat con información adicional
+/**
+ * Modelo auxiliar para la UI que combina Chat con información adicional
+ */
 data class ChatDisplay(
     val chat: Chat,
     val userName: String,
-    val messages: List<Message>
+    val profileImageUrl: String = "",
+    val messages: List<Message>,
+    val lastMessageTime: Long = 0L,
+    val unreadCount: Int = 0 // Nuevo campo: Cantidad de mensajes sin leer
 )
 
-class ChatViewModel : ViewModel() {
+/**
+ * Estados de la lista de chats
+ */
+sealed class ChatUiState {
+    object Loading : ChatUiState()
+    data class Success(val chats: List<ChatDisplay>) : ChatUiState()
+    object Empty : ChatUiState()
+    data class Error(val message: String) : ChatUiState()
+}
+
+class ChatViewModel(
+    private val chatRepository: ChatRepository = ChatRepository(),
+    private val messageRepository: MessageRepository = MessageRepository(),
+    private val artistRepository: ArtistRepository = ArtistRepository(),
+    private val customerRepository: CustomerRepository = CustomerRepository(),
+    private val authRepository: AuthRepository = AuthRepository()
+) : ViewModel() {
+
+    private val _uiState = MutableStateFlow<ChatUiState>(ChatUiState.Loading)
+    val uiState: StateFlow<ChatUiState> = _uiState.asStateFlow()
+
+    // Mantenemos este para compatibilidad con la vista actual
     private val _chatsDisplay = MutableStateFlow<List<ChatDisplay>>(emptyList())
     val chats: StateFlow<List<ChatDisplay>> = _chatsDisplay.asStateFlow()
 
     init {
-        loadChats()
+        loadChatsRealtime()
+        startGlobalMessageListener()
     }
 
-    private fun loadChats() {
-        // Datos de ejemplo - Reemplazar con datos reales de tu backend/base de datos
-        // En la implementación real, cargarías los mensajes desde MessageRepository
-        _chatsDisplay.value = listOf(
-            ChatDisplay(
-                chat = Chat(
-                    id_Chat = 1,
-                    id_Artist = 101,
-                    id_Customer = 1
-                ),
-                userName = "Pablo Picasso",
-                messages = listOf(
-                    Message(1, 1, 101, 1, "Hola, me interesa tu obra"),
-                    Message(2, 1, 1, 101, "Gracias por tu interés!")
+    /**
+     * Inicia un listener global que escucha TODOS los cambios en mensajes
+     * Esto permite actualizar el contador de no leídos en tiempo real
+     */
+    private fun startGlobalMessageListener() {
+        viewModelScope.launch {
+            messageRepository.getAllMessagesRealtime().collect { allMessages ->
+                android.util.Log.d("ChatViewModel", "🔔 Cambios detectados en mensajes globales")
+                // Recargar los chats cuando detectemos cambios en los mensajes
+                val currentUserId = authRepository.getCurrentUserId()
+                if (currentUserId != null) {
+                    chatRepository.getChatsByUser(currentUserId).fold(
+                        onSuccess = { chatList ->
+                            processChatList(chatList, currentUserId)
+                        },
+                        onFailure = { /* Ignorar errores en actualizaciones automáticas */ }
+                    )
+                }
+            }
+        }
+    }
+
+
+    fun loadChatsRealtime() {
+        viewModelScope.launch {
+            _uiState.value = ChatUiState.Loading
+
+            val currentUserId = authRepository.getCurrentUserId()
+
+            if (currentUserId != null) {
+
+                chatRepository.getChatsByUser(currentUserId).fold(
+                    onSuccess = { chatList ->
+                        processChatList(chatList, currentUserId)
+                        // Después de cargar inicialmente, escuchar actualizaciones en tiempo real
+                        startRealtimeUpdates(currentUserId)
+                    },
+                    onFailure = { error ->
+                        _uiState.value = ChatUiState.Error(
+                            error.message ?: "Error al cargar los chats"
+                        )
+                    }
                 )
-            ),
-            ChatDisplay(
-                chat = Chat(
-                    id_Chat = 2,
-                    id_Artist = 102,
-                    id_Customer = 1
-                ),
-                userName = "Frida Kahlo",
-                messages = listOf(
-                    Message(3, 2, 102, 1, "¿Cuánto cuesta esta pieza?"),
-                    Message(4, 2, 1, 102, "Te envío los detalles")
+            } else {
+                _uiState.value = ChatUiState.Error("Usuario no identificado")
+            }
+        }
+    }
+
+    /**
+     * Inicia actualizaciones en tiempo real para los chats
+     */
+    private fun startRealtimeUpdates(currentUserId: String) {
+        viewModelScope.launch {
+            while (true) {
+                kotlinx.coroutines.delay(3000) // Actualizar cada 3 segundos
+                chatRepository.getChatsByUser(currentUserId).fold(
+                    onSuccess = { chatList ->
+                        processChatList(chatList, currentUserId)
+                    },
+                    onFailure = { /* Ignorar errores silenciosamente en actualizaciones */ }
                 )
-            ),
-            ChatDisplay(
-                chat = Chat(
-                    id_Chat = 3,
-                    id_Artist = 103,
-                    id_Customer = 1
-                ),
-                userName = "Leonardo da Vinci",
-                messages = listOf(
-                    Message(5, 3, 103, 1, "Excelente trabajo")
+            }
+        }
+    }
+
+    /**
+     * Carga todos los chats desde Firebase (versión no en tiempo real)
+     */
+    fun loadChats() {
+        viewModelScope.launch {
+            _uiState.value = ChatUiState.Loading
+
+            val currentUserId = authRepository.getCurrentUserId()
+            
+            if (currentUserId != null) {
+                chatRepository.getChatsByUser(currentUserId).fold(
+                    onSuccess = { chatList ->
+                        processChatList(chatList, currentUserId)
+                    },
+                    onFailure = { error ->
+                        _uiState.value = ChatUiState.Error(
+                            error.message ?: "Error al cargar los chats"
+                        )
+                    }
                 )
-            ),
-            ChatDisplay(
-                chat = Chat(
-                    id_Chat = 4,
-                    id_Artist = 104,
-                    id_Customer = 1
-                ),
-                userName = "Vincent van Gogh",
-                messages = listOf(
-                    Message(6, 4, 104, 1, "Me encanta tu estilo"),
-                    Message(7, 4, 1, 104, "¡Muchas gracias!")
-                )
-            )
+            } else {
+                _uiState.value = ChatUiState.Error("Usuario no identificado")
+            }
+        }
+    }
+
+    /**
+     * Procesa la lista de chats para añadir mensajes y metadatos
+     */
+    private suspend fun processChatList(chatList: List<Chat>, currentUserId: String) {
+        if (chatList.isEmpty()) {
+            _uiState.value = ChatUiState.Empty
+            _chatsDisplay.value = emptyList()
+        } else {
+            // Cargar mensajes y detalles para cada chat
+            val chatsWithMessages = chatList.map { chat ->
+                loadChatMessages(chat, currentUserId)
+            }
+            // Ordenar por el mensaje más reciente
+            .sortedByDescending { it.lastMessageTime }
+
+            _chatsDisplay.value = chatsWithMessages
+            _uiState.value = ChatUiState.Success(chatsWithMessages)
+        }
+    }
+
+    /**
+     * Carga los mensajes de un chat específico y los datos del otro usuario
+     */
+    private suspend fun loadChatMessages(chat: Chat, currentUserId: String): ChatDisplay {
+        val messages = messageRepository.getMessagesByChat(chat.id_Chat).getOrElse {
+            emptyList()
+        }
+
+        // Determinar quién es el "otro" usuario en el chat
+        val otherUserId = if (currentUserId == chat.id_Artist) {
+            chat.id_Customer 
+        } else {
+            chat.id_Artist 
+        }
+
+        // Calcular mensajes no leídos (aquellos que NO envié yo y isRead es false)
+        val unreadCount = messages.count { !it.isRead && it.senderId != currentUserId }
+
+        // Obtener tiempo del último mensaje
+        val lastMessageTime = messages.lastOrNull()?.id_Message?.toLongOrNull() ?: 0L 
+        // Nota: Si usas timestamps reales en Message, úsalos aquí. 
+        // Si usas push() keys de Firebase, contienen el timestamp implícito pero es complejo extraerlo.
+        // Para simplificar, asumimos que el orden de la lista es cronológico.
+
+        // Intentar cargar datos del otro usuario
+        var userName = "Usuario"
+        var profileImageUrl = ""
+
+        // Intentar obtener datos como artista
+        val artist = artistRepository.getArtistById(otherUserId)
+        if (artist != null) {
+            userName = artist.UserName
+            profileImageUrl = artist.profileImageUrl
+        } else {
+            // Si no es artista, intentar como customer
+            val customer = customerRepository.getCustomerById(otherUserId)
+            if (customer != null) {
+                userName = customer.UserName
+                profileImageUrl = customer.profileImageUrl
+            }
+        }
+
+        return ChatDisplay(
+            chat = chat,
+            userName = userName,
+            profileImageUrl = profileImageUrl,
+            messages = messages,
+            lastMessageTime = lastMessageTime, // O System.currentTimeMillis() si prefieres
+            unreadCount = unreadCount
         )
     }
 
-    fun getChatById(chatId: Int): ChatDisplay? {
+    /**
+     * Obtiene un chat por su ID
+     */
+    fun getChatById(chatId: String): ChatDisplay? {
         return _chatsDisplay.value.find { it.chat.id_Chat == chatId }
+    }
+
+    /**
+     * Recarga los chats, iniciando el monitoreo en tiempo real
+     */
+    fun refresh() {
+        loadChatsRealtime()
     }
 }

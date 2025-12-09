@@ -43,6 +43,7 @@ fun EditProfileScreen(
     viewModel: UserProfileViewModel = viewModel()
 ) {
     val userProfile by viewModel.userProfile.collectAsState()
+    val isArtist by viewModel.isArtist.collectAsState()
 
     var name by remember { mutableStateOf(userProfile.name) }
     var bio by remember { mutableStateOf(userProfile.bio) }
@@ -121,7 +122,6 @@ fun EditProfileScreen(
                     modifier = Modifier
                         .size(120.dp)
                         .clip(CircleShape)
-                        .clickable { imagePickerLauncher.launch("image/*") }
                         .background(
                             if (profileImageUri == null) {
                                 Brush.linearGradient(
@@ -206,71 +206,76 @@ fun EditProfileScreen(
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                // Biografía
-                Text(
-                    text = "Biografía",
-                    color = TextPrimary,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(
-                    value = bio,
-                    onValueChange = { bio = it },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(100.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = AccentGold,
-                        unfocusedContainerColor = AccentGold,
-                        focusedTextColor = Color.Black,
-                        unfocusedTextColor = Color.Black,
-                        cursorColor = Color.Black,
-                        focusedBorderColor = Color.Transparent,
-                        unfocusedBorderColor = Color.Transparent
-                    ),
-                    shape = RoundedCornerShape(8.dp),
-                    maxLines = 4,
-                    textStyle = LocalTextStyle.current.copy(
-                        fontSize = 16.sp,
+                // Biografía - Solo para artistas
+                if (isArtist) {
+                    Text(
+                        text = "Biografía",
+                        color = TextPrimary,
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.Medium
                     )
-                )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = bio,
+                        onValueChange = { bio = it },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(100.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedContainerColor = AccentGold,
+                            unfocusedContainerColor = AccentGold,
+                            focusedTextColor = Color.Black,
+                            unfocusedTextColor = Color.Black,
+                            cursorColor = Color.Black,
+                            focusedBorderColor = Color.Transparent,
+                            unfocusedBorderColor = Color.Transparent
+                        ),
+                        shape = RoundedCornerShape(8.dp),
+                        maxLines = 4,
+                        textStyle = LocalTextStyle.current.copy(
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    )
 
-                Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(20.dp))
 
-                // Ubicación
-                Text(
-                    text = "Ubicación",
-                    color = TextPrimary,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(
-                    value = location,
-                    onValueChange = { location = it },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = AccentGold,
-                        unfocusedContainerColor = AccentGold,
-                        focusedTextColor = Color.Black,
-                        unfocusedTextColor = Color.Black,
-                        cursorColor = Color.Black,
-                        focusedBorderColor = Color.Transparent,
-                        unfocusedBorderColor = Color.Transparent
-                    ),
-                    shape = RoundedCornerShape(8.dp),
-                    singleLine = true,
-                    textStyle = LocalTextStyle.current.copy(
-                        fontSize = 16.sp,
+                    // Ubicación - Solo para artistas
+                    Text(
+                        text = "Ubicación",
+                        color = TextPrimary,
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.Medium
                     )
-                )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = location,
+                        onValueChange = { location = it },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedContainerColor = AccentGold,
+                            unfocusedContainerColor = AccentGold,
+                            focusedTextColor = Color.Black,
+                            unfocusedTextColor = Color.Black,
+                            cursorColor = Color.Black,
+                            focusedBorderColor = Color.Transparent,
+                            unfocusedBorderColor = Color.Transparent
+                        ),
+                        shape = RoundedCornerShape(8.dp),
+                        singleLine = true,
+                        textStyle = LocalTextStyle.current.copy(
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Medium
+                        )
+                    )
 
-                Spacer(modifier = Modifier.height(40.dp))
+                    Spacer(modifier = Modifier.height(40.dp))
+                } else {
+                    // Para customers, solo un espacio antes de los botones
+                    Spacer(modifier = Modifier.height(40.dp))
+                }
 
                 // Buttons
                 Row(

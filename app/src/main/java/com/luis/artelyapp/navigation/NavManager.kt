@@ -12,6 +12,7 @@ import com.luis.artelyapp.view.main.GalleryScreen
 import com.luis.artelyapp.view.chatView.ChatView
 import com.luis.artelyapp.view.messageView.MessageView
 import com.luis.artelyapp.view.ArtistProfile.ArtistProfileScreen
+import com.luis.artelyapp.view.ArtworkDetail.ArtworkDetailScreen
 import com.luis.artelyapp.view.UserProfile.UserProfileScreen
 import com.luis.artelyapp.view.UserProfile.UserProfileViewModel
 import com.luis.artelyapp.view.UserProfile.EditProfileScreen
@@ -23,36 +24,49 @@ sealed class Screen(val route: String) {
     object Gallery : Screen("gallery")
     object Chat : Screen("chat")
     object Message : Screen("message/{chatId}") {
-        fun createRoute(chatId: Int) = "message/$chatId"
+        fun createRoute(chatId: String) = "message/$chatId"
     }
-    object Profile : Screen("profile/{artistName}") {
-        fun createRoute(artistName: String) = "profile/${Uri.encode(artistName)}"
+    object Profile : Screen("profile/{artistId}") {
+        fun createRoute(artistId: String) = "profile/${Uri.encode(artistId)}"
+    }
+    object ArtworkDetail : Screen("artworkdetail/{artworkId}/{artistId}") {
+        fun createRoute(artworkId: String, artistId: String) = "artworkdetail/$artworkId/$artistId"
     }
     object UserProfile : Screen("userprofile")
     object EditProfile : Screen("editprofile")
     object Upload : Screen("upload")
     object EditArtwork : Screen("editartwork/{artworkId}") {
-        fun createRoute(artworkId: Int) = "editartwork/$artworkId"
+        fun createRoute(artworkId: String) = "editartwork/$artworkId"
     }
     object CreatePost : Screen("createpost")
 }
 
 @Composable
-fun NavManager() {
+fun NavManager(onLogout: () -> Unit = {}) {
     val navController = rememberNavController()
     val userProfileViewModel: UserProfileViewModel = viewModel()
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val activity = context as? android.app.Activity
 
     NavHost(
         navController = navController,
         startDestination = Screen.Gallery.route
     ) {
         composable(Screen.Gallery.route) {
+            // BackHandler para Gallery: salir de la app
+            androidx.activity.compose.BackHandler {
+                activity?.finish()
+            }
+
             GalleryScreen(
                 onNavigateToChat = {
                     navController.navigate(Screen.Chat.route)
                 },
-                onArtistClick = { artistName ->
-                    navController.navigate(Screen.Profile.createRoute(artistName))
+                onArtistClick = { artistId ->
+                    navController.navigate(Screen.Profile.createRoute(artistId))
+                },
+                onArtworkClick = { artworkId, artistId ->
+                    navController.navigate(Screen.ArtworkDetail.createRoute(artworkId, artistId))
                 },
                 onNavigateToProfile = {
                     navController.navigate(Screen.UserProfile.route)
@@ -61,15 +75,19 @@ fun NavManager() {
         }
 
         composable(Screen.Chat.route) {
+            // BackHandler para Chat: ir a Gallery
+            androidx.activity.compose.BackHandler {
+                navController.navigate(Screen.Gallery.route) {
+                    popUpTo(Screen.Gallery.route) { inclusive = true }
+                }
+            }
+
             ChatView(
                 onNavigateToMessage = { chatId ->
                     navController.navigate(Screen.Message.createRoute(chatId))
                 },
                 onNavigateToGallery = {
                     navController.navigate(Screen.Gallery.route)
-                },
-                onNavigateToCreate = {
-                    navController.navigate(Screen.CreatePost.route)
                 },
                 onNavigateToProfile = {
                     navController.navigate(Screen.UserProfile.route)
@@ -80,10 +98,10 @@ fun NavManager() {
         composable(
             route = Screen.Message.route,
             arguments = listOf(
-                navArgument("chatId") { type = NavType.IntType }
+                navArgument("chatId") { type = NavType.StringType }
             )
         ) { backStackEntry ->
-            val chatId = backStackEntry.arguments?.getInt("chatId") ?: 0
+            val chatId = backStackEntry.arguments?.getString("chatId") ?: ""
             MessageView(
                 chatId = chatId,
                 onBackClick = { navController.popBackStack() }
@@ -93,27 +111,98 @@ fun NavManager() {
         composable(
             route = Screen.Profile.route,
             arguments = listOf(
-                navArgument("artistName") { type = NavType.StringType }
+                navArgument("artistId") { type = NavType.StringType }
             )
         ) { backStackEntry ->
-            val artistName = backStackEntry.arguments?.getString("artistName") ?: ""
+            // BackHandler para Artist Profile: ir a Gallery
+            androidx.activity.compose.BackHandler {
+                navController.navigate(Screen.Gallery.route) {
+                    popUpTo(Screen.Gallery.route) { inclusive = true }
+                }
+            }
+
+            val artistId = backStackEntry.arguments?.getString("artistId") ?: ""
             ArtistProfileScreen(
-                artistName = artistName,
-                onBackClick = { navController.popBackStack() }
+                artistId = artistId,
+                onBackClick = {
+                    navController.navigate(Screen.Gallery.route) {
+                        popUpTo(Screen.Gallery.route) { inclusive = true }
+                    }
+                },
+                onArtworkClick = { artworkId ->
+                    navController.navigate(Screen.ArtworkDetail.createRoute(artworkId, artistId))
+                },
+                onNavigateToGallery = {
+                    navController.navigate(Screen.Gallery.route) {
+                        popUpTo(Screen.Gallery.route) { inclusive = true }
+                    }
+                },
+                onNavigateToChat = {
+                    navController.navigate(Screen.Chat.route) {
+                        popUpTo(Screen.Gallery.route)
+                    }
+                },
+                onNavigateToUserProfile = {
+                    navController.navigate(Screen.UserProfile.route) {
+                        popUpTo(Screen.Gallery.route)
+                    }
+                }
+            )
+        }
+
+        composable(
+            route = Screen.ArtworkDetail.route,
+            arguments = listOf(
+                navArgument("artworkId") { type = NavType.StringType },
+                navArgument("artistId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val artworkId = backStackEntry.arguments?.getString("artworkId") ?: ""
+            val artistId = backStackEntry.arguments?.getString("artistId") ?: ""
+
+            ArtworkDetailScreen(
+                artworkId = artworkId,
+                artistId = artistId,
+                onBackClick = { navController.popBackStack() },
+                onNavigateToArtistProfile = { artistId ->
+                    navController.navigate(Screen.Profile.createRoute(artistId)) {
+                        popUpTo(Screen.Gallery.route)
+                    }
+                },
+                onNavigateToOwnProfile = {
+                    navController.navigate(Screen.UserProfile.route) {
+                        popUpTo(Screen.Gallery.route)
+                    }
+                },
+                onNavigateToChatWithArtist = { chatId ->
+                    navController.navigate(Screen.Message.createRoute(chatId))
+                }
             )
         }
 
         composable(Screen.UserProfile.route) {
+            // BackHandler para UserProfile: ir a Gallery
+            androidx.activity.compose.BackHandler {
+                navController.navigate(Screen.Gallery.route) {
+                    popUpTo(Screen.Gallery.route) { inclusive = true }
+                }
+            }
+
             UserProfileScreen(
-                onBackClick = { navController.popBackStack() },
+                onBackClick = {
+                    // También manejar el botón de back del TopBar
+                    navController.navigate(Screen.Gallery.route) {
+                        popUpTo(Screen.Gallery.route) { inclusive = true }
+                    }
+                },
                 onEditProfile = { navController.navigate(Screen.EditProfile.route) },
                 onNavigateToUpload = { navController.navigate(Screen.Upload.route) },
                 onEditArtwork = { artworkId ->
                     navController.navigate(Screen.EditArtwork.createRoute(artworkId))
                 },
                 onNavigateToGallery = { navController.navigate(Screen.Gallery.route) },
-                onNavigateToSearch = { navController.navigate(Screen.Gallery.route) }, // Por ahora va a Gallery
-                onNavigateToCreate = { navController.navigate(Screen.CreatePost.route) },
+                onNavigateToChat = { navController.navigate(Screen.Chat.route) },
+                onLogout = onLogout,
                 viewModel = userProfileViewModel
             )
         }
@@ -131,9 +220,9 @@ fun NavManager() {
         composable(Screen.Upload.route) {
             Upload(
                 onBackClick = { navController.popBackStack() },
-                onPublishWork = { title, description, imageUri, isForSale, price ->
+                onPublishWork = { title, description, technique, imageUri, isForSale, price ->
                     // Agregar la obra al ViewModel
-                    userProfileViewModel.addArtwork(title, description, imageUri, isForSale, price)
+                    userProfileViewModel.addArtwork(title, description, technique, imageUri, isForSale, price)
                     // Regresar a UserProfile
                     navController.popBackStack()
                 }
@@ -143,10 +232,10 @@ fun NavManager() {
         composable(
             route = Screen.EditArtwork.route,
             arguments = listOf(
-                navArgument("artworkId") { type = NavType.IntType }
+                navArgument("artworkId") { type = NavType.StringType }
             )
         ) { backStackEntry ->
-            val artworkId = backStackEntry.arguments?.getInt("artworkId") ?: 0
+            val artworkId = backStackEntry.arguments?.getString("artworkId") ?: ""
             val artwork = userProfileViewModel.getArtworkById(artworkId)
 
             if (artwork != null) {
@@ -158,7 +247,7 @@ fun NavManager() {
                     currentIsForSale = artwork.isForSale,
                     currentPrice = artwork.price,
                     onBackClick = { navController.popBackStack() },
-                    onSaveChanges = { id: Int, title: String, description: String, imageUri: Uri?, isForSale: Boolean, price: String? ->
+                    onSaveChanges = { id: String, title: String, description: String, imageUri: Uri?, isForSale: Boolean, price: String? ->
                         userProfileViewModel.updateArtwork(id, title, description, imageUri, isForSale, price)
                         navController.popBackStack()
                     }
