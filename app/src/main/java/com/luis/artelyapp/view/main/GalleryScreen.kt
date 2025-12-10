@@ -38,20 +38,26 @@ fun GalleryScreen(
     onNavigateToChat: () -> Unit = {},
     onArtistClick: (String) -> Unit = {},
     onArtworkClick: (String, String) -> Unit = { _, _ -> },
-    onNavigateToProfile: () -> Unit = {}
+    onNavigateToProfile: () -> Unit = {},
+    onNavigateToFavorites: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val favoritesCount by viewModel.favoritesCount.collectAsState()
 
     Scaffold(
         containerColor = Color.Transparent,
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
-            BottomNavigationBar(onTabSelected = { index ->
-                when (index) {
-                    1 -> onNavigateToChat()
-                    2 -> onNavigateToProfile()
+            BottomNavigationBar(
+                favoritesCount = favoritesCount,
+                onTabSelected = { index ->
+                    when (index) {
+                        1 -> onNavigateToChat()
+                        2 -> if (favoritesCount > 0) onNavigateToFavorites()
+                        3 -> onNavigateToProfile()
+                    }
                 }
-            })
+            )
         }
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
@@ -378,7 +384,10 @@ fun ArtworkCard(art: com.luis.artelyapp.model.Artwork, onArtworkClick: (String, 
 }
 
 @Composable
-fun BottomNavigationBar(onTabSelected: (Int) -> Unit = {}) {
+fun BottomNavigationBar(
+    favoritesCount: Int = 0,
+    onTabSelected: (Int) -> Unit = {}
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -388,12 +397,36 @@ fun BottomNavigationBar(onTabSelected: (Int) -> Unit = {}) {
         horizontalArrangement = Arrangement.SpaceAround,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        val items = listOf("Inicio" to "🏠", "Chat" to "💬", "Perfil" to "👤")
+        // Crear lista dinámica de items según si hay favoritos
+        val items = if (favoritesCount > 0) {
+            listOf(
+                "Inicio" to "🏠",
+                "Chat" to "💬",
+                "Favoritos" to "❤️",
+                "Perfil" to "👤"
+            )
+        } else {
+            listOf(
+                "Inicio" to "🏠",
+                "Chat" to "💬",
+                "Perfil" to "👤"
+            )
+        }
+
         items.forEachIndexed { index, pair ->
-            Column(horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.clickable { onTabSelected(index) }) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.clickable { onTabSelected(index) }
+            ) {
+                // Solo mostrar el emoji sin badge
                 Text(text = pair.second, fontSize = 18.sp)
-                Text(text = pair.first, fontSize = 12.sp, color = if (index == 0) Color(0xFFD4AF37) else Color(0xFF888888))
+
+
+                Text(
+                    text = pair.first,
+                    fontSize = 10.sp,
+                    color = if (index == 0) Color(0xFFD4AF37) else Color(0xFF888888)
+                )
             }
         }
     }

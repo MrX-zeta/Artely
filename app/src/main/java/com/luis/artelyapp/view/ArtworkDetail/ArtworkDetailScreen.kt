@@ -22,6 +22,7 @@ import com.luis.artelyapp.repository.AuthRepository
 import com.luis.artelyapp.repository.ChatRepository
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
+import com.luis.artelyapp.viewmodel.FavoriteViewModel
 
 private val DarkBackground = Color(0xFF1A1A1A)
 private val CardBackground = Color(0xFF2A2A2A)
@@ -35,16 +36,38 @@ fun ArtworkDetailScreen(
     artworkId: String,
     artistId: String,
     viewModel: com.luis.artelyapp.viewmodel.ArtistViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
+    favoriteViewModel: FavoriteViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
     onBackClick: () -> Unit = {},
     onNavigateToArtistProfile: (String) -> Unit = {},
     onNavigateToOwnProfile: () -> Unit = {},
-    onNavigateToChatWithArtist: (String) -> Unit = {}
+    onNavigateToChatWithArtist: (String) -> Unit = {},
+    onNavigateToFavorites: () -> Unit = {}
 ) {
     // Verificar si el usuario actual es el artista de la obra
     val authRepository = remember { AuthRepository() }
     val currentUserId = remember { authRepository.getCurrentUserId() }
     val isOwnArtwork = remember(currentUserId, artistId) {
         currentUserId == artistId
+    }
+
+    // Verificar el rol del usuario
+    var userRole by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(Unit) {
+        val result = authRepository.getCurrentUserRole()
+        result.fold(
+            onSuccess = { role -> userRole = role },
+            onFailure = { userRole = null }
+        )
+    }
+
+    // Estado de favoritos
+    val isFavorite by favoriteViewModel.isFavorite.collectAsState()
+
+    LaunchedEffect(artworkId) {
+        // Verificar si esta obra está en favoritos solo si es customer
+        if (userRole == "Customer") {
+            favoriteViewModel.checkIsFavorite(artworkId)
+        }
     }
 
     val coroutineScope = rememberCoroutineScope()
@@ -494,6 +517,53 @@ fun ArtworkDetailScreen(
                                         fontWeight = FontWeight.Bold
                                     )
                                 }
+                            }
+                        }
+                    }
+
+                    // Botón de agregar/quitar favoritos (solo para customers y no en sus propias obras)
+                    if (userRole == "Customer" && !isOwnArtwork) {
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Button(
+                            onClick = {
+                                if (isFavorite) {
+                                    // Quitar de favoritos
+                                    favoriteViewModel.removeFromFavorites()
+                                } else {
+                                    // Agregar a favoritos y navegar
+                                    favoriteViewModel.addToFavorites(
+                                        artworkId = artworkId,
+                                        artistId = artistId,
+                                        onSuccess = {
+                                            // Navegar a la pantalla de favoritos
+                                            onNavigateToFavorites()
+                                        }
+                                    )
+                                }
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(50.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (isFavorite) Color(0xFF666666) else Color(0xFFE91E63)
+                            ),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = if (isFavorite) "💔" else "❤️",
+                                    fontSize = 18.sp
+                                )
+                                Text(
+                                    text = if (isFavorite) "Quitar de favoritos" else "Agregar a favoritos",
+                                    color = Color.White,
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
                             }
                         }
                     }

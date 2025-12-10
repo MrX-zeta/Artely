@@ -19,6 +19,7 @@ import com.luis.artelyapp.view.UserProfile.EditProfileScreen
 import com.luis.artelyapp.view.uploadwork.Upload
 import com.luis.artelyapp.view.EditArtwork.EditArtworkScreen
 import com.luis.artelyapp.view.CreatePost.CreatePostScreen
+import com.luis.artelyapp.view.Favorites.FavoritesScreen
 
 sealed class Screen(val route: String) {
     object Gallery : Screen("gallery")
@@ -39,6 +40,7 @@ sealed class Screen(val route: String) {
         fun createRoute(artworkId: String) = "editartwork/$artworkId"
     }
     object CreatePost : Screen("createpost")
+    object Favorites : Screen("favorites")
 }
 
 @Composable
@@ -70,6 +72,9 @@ fun NavManager(onLogout: () -> Unit = {}) {
                 },
                 onNavigateToProfile = {
                     navController.navigate(Screen.UserProfile.route)
+                },
+                onNavigateToFavorites = {
+                    navController.navigate(Screen.Favorites.route)
                 }
             )
         }
@@ -176,6 +181,9 @@ fun NavManager(onLogout: () -> Unit = {}) {
                 },
                 onNavigateToChatWithArtist = { chatId ->
                     navController.navigate(Screen.Message.createRoute(chatId))
+                },
+                onNavigateToFavorites = {
+                    navController.navigate(Screen.Favorites.route)
                 }
             )
         }
@@ -261,6 +269,40 @@ fun NavManager(onLogout: () -> Unit = {}) {
                 onPublishPost = { title, description ->
                     // Por ahora solo regresamos a la pantalla anterior
                     navController.popBackStack()
+                }
+            )
+        }
+
+        composable(Screen.Favorites.route) {
+            androidx.activity.compose.BackHandler {
+                navController.navigate(Screen.Gallery.route) {
+                    popUpTo(Screen.Gallery.route) { inclusive = true }
+                }
+            }
+
+            FavoritesScreen(
+                onBackClick = {
+                    navController.navigate(Screen.Gallery.route) {
+                        popUpTo(Screen.Gallery.route) { inclusive = true }
+                    }
+                },
+                onArtworkClick = { artworkId, artistId ->
+                    navController.navigate(Screen.ArtworkDetail.createRoute(artworkId, artistId))
+                },
+                onNavigateToGallery = {
+                    navController.navigate(Screen.Gallery.route) {
+                        popUpTo(Screen.Gallery.route) { inclusive = true }
+                    }
+                },
+                onNavigateToChat = {
+                    navController.navigate(Screen.Chat.route) {
+                        popUpTo(Screen.Gallery.route)
+                    }
+                },
+                onNavigateToProfile = {
+                    navController.navigate(Screen.UserProfile.route) {
+                        popUpTo(Screen.Gallery.route)
+                    }
                 }
             )
         }

@@ -3,6 +3,8 @@ package com.luis.artelyapp.view.main
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.luis.artelyapp.repository.ArtworkRepository
+import com.luis.artelyapp.repository.AuthRepository
+import com.luis.artelyapp.repository.FavoriteRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,7 +21,9 @@ sealed class GalleryUiState {
 }
 
 class GalleryViewModel(
-    private val repository: ArtworkRepository = ArtworkRepository()
+    private val repository: ArtworkRepository = ArtworkRepository(),
+    private val favoriteRepository: FavoriteRepository = FavoriteRepository(),
+    private val authRepository: AuthRepository = AuthRepository()
 ) : ViewModel() {
 
     private val _selectedTab = MutableStateFlow(0)
@@ -28,8 +32,27 @@ class GalleryViewModel(
     private val _uiState = MutableStateFlow<GalleryUiState>(GalleryUiState.Loading)
     val uiState: StateFlow<GalleryUiState> = _uiState.asStateFlow()
 
+    private val _favoritesCount = MutableStateFlow(0)
+    val favoritesCount: StateFlow<Int> = _favoritesCount.asStateFlow()
+
     init {
         loadArtworks()
+        loadFavoritesCount()
+    }
+
+    /**
+     * Carga el conteo de favoritos del usuario actual
+     */
+    private fun loadFavoritesCount() {
+        viewModelScope.launch {
+            val userId = authRepository.getCurrentUserId()
+            if (userId != null) {
+                // Usar Flow para escuchar cambios en tiempo real
+                favoriteRepository.getFavoritesByCustomer(userId).collect { favorites ->
+                    _favoritesCount.value = favorites.size
+                }
+            }
+        }
     }
 
     /**
