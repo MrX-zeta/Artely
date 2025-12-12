@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AgentMigrationStateService">
+    <option name="migrationStatus" value="IN_PROGRESS" />
+    <option name="pendingSessionIds">
+      <option value="33929349-aa09-4709-8c67-f66633f1abc2" />
+      <option value="6b73008f-99f0-4040-8a43-6c1bb785a004" />
+      <option value="c9b6dc88-ae31-4187-b988-00239f0edb6d" />
+      <option value="e533075e-fb18-4af0-93f7-e5a4e40566f3" />
+      <option value="ef59345a-81e1-42a6-abce-189d01561d01" />
+    </option>
+    <option name="pendingTurns">
+      <map>
+        <entry key="33929349-aa09-4709-8c67-f66633f1abc2">
+          <value>
+            <set>
+              <option value="167d2b9e-8aba-4446-a19e-aee1ef686d38" />
+              <option value="3bf6ab24-a10f-4696-b3ea-16fa645bc0be" />
+              <option value="5d4847d5-4297-427b-822d-82bd0b6834be" />
+              <option value="85199d1a-1451-483d-845b-eef6d005e0ae" />
+              <option value="a859630f-9965-4be1-89c4-46382c1b23b1" />
+              <option value="b383db30-83d9-4b0c-99bd-bdeb51d1b154" />
+              <option value="b42a2218-7270-4dd1-ba6e-0edd6b01626b" />
+              <option value="e14eb6e9-78d3-42f5-b1b0-e797b5216683" />
+              <option value="e7d35dd9-2ca3-4c45-b792-23a7912d86ad" />
+              <option value="fc40c8c8-4b46-4440-9c79-d2bc79c9a98f" />
+            </set>
+          </value>
+        </entry>
+        <entry key="6b73008f-99f0-4040-8a43-6c1bb785a004">
+          <value>
+            <set>
+              <option value="172d06bc-479d-477e-960d-f8a9f189c4d5" />
+              <option value="f647c5ff-175d-4390-a042-da1c4d965848" />
+              <option value="959f5df2-2525-4218-bfac-e78ea9c30e16" />
+              <option value="3e3fee67-81c4-4664-9a96-bf992e39c63d" />
+              <option value="7729cdf2-df3a-4c99-8eb3-1c3684b55a1f" />
+              <option value="698d83d1-9f5d-42da-adf4-d72e7d02628a" />
+              <option value="f9c1b45a-10ff-44d0-91b3-73cee80025d7" />
+              <option value="acebfc64-451b-41ce-9b99-31732c0a2220" />
+            </set>
+          </value>
+        </entry>
+        <entry key="c9b6dc88-ae31-4187-b988-00239f0edb6d">
+          <value>
+            <set>
+              <option value="51774504-5576-4117-9515-8cfa2da97b03" />
+              <option value="89b269e3-e86b-4320-87e6-c647eeabc754" />
+              <option value="ceaf4a50-7e19-48b7-a47e-62eb64638810" />
+              <option value="dbcc3708-af98-456d-b8f3-d3d5949f6b8b" />
+            </set>
+          </value>
+        </entry>
+        <entry key="e533075e-fb18-4af0-93f7-e5a4e40566f3">
+          <value>
+            <set>
+              <option value="7209852e-e977-46e0-88a4-3c6a7f93aab2" />
+              <option value="91e77dd7-5e96-4ff2-9dda-890b34165733" />
+              <option value="9774fe77-0cee-4e86-bbbf-9c4b78d2bbc2" />
+              <option value="99523915-c849-4e2e-a54e-16ec4470e8d2" />
+              <option value="9f7c9ae3-7462-44af-a5d9-6af6c167fd89" />
+              <option value="ca30381a-2edf-44d8-a824-837c7dba301c" />
+            </set>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <pendingWorkingSetItems>
+      <entry key="33929349-aa09-4709-8c67-f66633f1abc2" />
+      <entry key="6b73008f-99f0-4040-8a43-6c1bb785a004">
+        <set>
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/model/Favorite.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/repository/FavoriteRepository.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/viewmodel/FavoriteViewModel.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/view/Favorites/FavoritesScreen.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/view/ArtworkDetail/ArtworkDetailScreen.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/navigation/NavManager.kt" />
+          <option value="file://$PROJECT_DIR$/FAVORITOS_DOCUMENTACION.md" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/view/main/GalleryViewModel.kt" />
+          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/view/main/GalleryScreen.kt" />
+        </set>
+      </entry>
+      <entry key="c9b6dc88-ae31-4187-b988-00239f0edb6d" />
+      <entry key="e533075e-fb18-4af0-93f7-e5a4e40566f3" />
+    </pendingWorkingSetItems>
+  </component>
+</project>
