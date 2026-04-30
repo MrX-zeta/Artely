@@ -16,24 +16,12 @@ class MainActivity : ComponentActivity() {
 
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
-    ) { //isGranted: Boolean ->
+    ) {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-
-        // DESHABILITADO: La persistencia causa problemas con datos obsoletos en caché
-        // Especialmente con el estado isRead de los mensajes
-        /*
-        try {
-            FirebaseDatabase.getInstance().setPersistenceEnabled(true)
-        } catch (e: Exception) {
-            android.util.Log.w("MainActivity", "Error al habilitar la persistencia: ${e.message}")
-        }
-        */
-
-        android.util.Log.d("MainActivity", "🔥 Persistencia de Firebase DESHABILITADA para evitar caché obsoleta")
 
         checkAndRequestNotificationPermission()
 

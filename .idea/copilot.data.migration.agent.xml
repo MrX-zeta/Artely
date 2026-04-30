@@ -4,10 +4,14 @@
     <option name="migrationStatus" value="IN_PROGRESS" />
     <option name="pendingSessionIds">
       <option value="33929349-aa09-4709-8c67-f66633f1abc2" />
+      <option value="5a41751f-66d7-4351-bfa9-112bd6f4aa78" />
+      <option value="6a4ccc5c-f055-4080-bc86-b5eb80e93ab7" />
       <option value="6b73008f-99f0-4040-8a43-6c1bb785a004" />
+      <option value="b088ba73-35e9-4fc9-ac17-b1255a518c6d" />
       <option value="c9b6dc88-ae31-4187-b988-00239f0edb6d" />
       <option value="e533075e-fb18-4af0-93f7-e5a4e40566f3" />
       <option value="ef59345a-81e1-42a6-abce-189d01561d01" />
+      <option value="f670fcb4-708c-4a7e-8db9-9ce542226669" />
     </option>
     <option name="pendingTurns">
       <map>
@@ -31,13 +35,13 @@
           <value>
             <set>
               <option value="172d06bc-479d-477e-960d-f8a9f189c4d5" />
-              <option value="f647c5ff-175d-4390-a042-da1c4d965848" />
-              <option value="959f5df2-2525-4218-bfac-e78ea9c30e16" />
               <option value="3e3fee67-81c4-4664-9a96-bf992e39c63d" />
-              <option value="7729cdf2-df3a-4c99-8eb3-1c3684b55a1f" />
               <option value="698d83d1-9f5d-42da-adf4-d72e7d02628a" />
-              <option value="f9c1b45a-10ff-44d0-91b3-73cee80025d7" />
+              <option value="7729cdf2-df3a-4c99-8eb3-1c3684b55a1f" />
+              <option value="959f5df2-2525-4218-bfac-e78ea9c30e16" />
               <option value="acebfc64-451b-41ce-9b99-31732c0a2220" />
+              <option value="f647c5ff-175d-4390-a042-da1c4d965848" />
+              <option value="f9c1b45a-10ff-44d0-91b3-73cee80025d7" />
             </set>
           </value>
         </entry>
@@ -67,19 +71,7 @@
     </option>
     <pendingWorkingSetItems>
       <entry key="33929349-aa09-4709-8c67-f66633f1abc2" />
-      <entry key="6b73008f-99f0-4040-8a43-6c1bb785a004">
-        <set>
-          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/model/Favorite.kt" />
-          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/repository/FavoriteRepository.kt" />
-          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/viewmodel/FavoriteViewModel.kt" />
-          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/view/Favorites/FavoritesScreen.kt" />
-          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/view/ArtworkDetail/ArtworkDetailScreen.kt" />
-          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/navigation/NavManager.kt" />
-          <option value="file://$PROJECT_DIR$/FAVORITOS_DOCUMENTACION.md" />
-          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/view/main/GalleryViewModel.kt" />
-          <option value="file://$PROJECT_DIR$/app/src/main/java/com/luis/artelyapp/view/main/GalleryScreen.kt" />
-        </set>
-      </entry>
+      <entry key="6b73008f-99f0-4040-8a43-6c1bb785a004" />
       <entry key="c9b6dc88-ae31-4187-b988-00239f0edb6d" />
       <entry key="e533075e-fb18-4af0-93f7-e5a4e40566f3" />
     </pendingWorkingSetItems>
